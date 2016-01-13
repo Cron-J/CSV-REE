@@ -29,13 +29,13 @@ class MappingTable extends Component {
 		this.setState({showtransformations: false, transformations: []});
 	}
 	tabledataFormat = (data, row) => {
-		return row.table + '.' + row.field;
+		return row.actualTable + '.' + row.field;
 	}
 	transformationsFormat = (data, row) => {
-		return <Button bsStyle="default" bsSize="xsmall" onClick={this.onTransformation.bind(this, row.transformations, row.index)}><Glyphicon glyph="edit"/></Button>;;
+		return <Button bsStyle="default" bsSize="xsmall" onClick={this.onTransformation.bind(this, row.transformations, row.indx)}><Glyphicon glyph="edit"/></Button>;;
 	}
 	actionFormat = (data, row) => {
-		return <Button bsStyle="danger" bsSize="xsmall" onClick={this.removeRow.bind(this, row.index)}>Remove <Glyphicon glyph="remove"/></Button>;
+		return <Button bsStyle="danger" bsSize="xsmall" onClick={this.removeRow.bind(this, row.indx)}>Remove <Glyphicon glyph="remove"/></Button>;
 	}
 	render() {
 		return (
@@ -51,7 +51,7 @@ class MappingTable extends Component {
 		              {value: 'transformations', label: 'Transformation'},
 		              {value: 'table', label: 'Property name'},
 		              {value: 'field', label: 'Property description'},
-		              {value: 'index', label: 'Index'},
+		              {value: 'indx', label: 'Index'},
 		              {value: 'action', label: 'Actions'}
 		              // 'instance',
 		              // 'isRequired',

@@ -313,6 +313,7 @@ function mapData(mapping){
       "actualTable": mapping.selectedTable,
       "defaultValue": mapping.defaultValue,
       "index": index,
+      'indx': mapping.mappingData.length,
       "instance": '',
       "isRequired": ''
     });
@@ -347,6 +348,7 @@ function attributeMapping(mapping) {
     "field": 'value',
     "defaultValue": mapping.defaultValue,
     "index": childIndex,
+    "indx": mapping.mappingData.length,
     "instance": '',
     "actualTable": tablename,
     "table": 'attributeValues',
@@ -358,6 +360,7 @@ function attributeMapping(mapping) {
     "field": 'attribute',
     "defaultValue": mapping.defaultValue,
     "index": childIndex,
+    "indx": mapping.mappingData.length+1,
     "actualTable": tablename,
     "instance": '',
     "table": 'attributeValues',
@@ -387,6 +390,7 @@ function autoMapping(currentState) {
               "field": index,
               "defaultValue": currentState.mapping.defaultValue,
               "index": currentState.mapping.mappingData.length + 1,
+              "indx": currentState.mapping.mappingData.length,
               'actualTable': synonymsList[index].tableName,
               "instance": '',
               "isRequired": ''
@@ -403,7 +407,6 @@ function autoMapping(currentState) {
 function childTab(currentState){
   let mappingData = currentState.mapping.mappedData;
   for(let i=0; i<mappingData.length; i++){
-    console.log('----.', currentState.mapping);
     for(let index=0; index<currentState.mapping.tables[0].children.length; index++){
       if(mappingData[i].table == currentState.mapping.tables[0].children[index].value){
         currentState.mapping.tables[0].children[index].children.push({'value':currentState.mapping.tables[0].children[index].value+'('+currentState.mapping.tables[0].children[index].children.length+')','label':currentState.mapping.tables[0].children[index].value+'('+currentState.mapping.tables[0].children[index].children.length+')'});
@@ -518,6 +521,7 @@ export default createReducer(initialState, {
     };
   },
   [types.HANDLECSVPREVIEWNUMBER] (state, action) {
+    console.log('===>', state);
     const {numberformat} = action.payload;
     const preview = state.preview;
     preview.numberFormat = numberformat;
@@ -542,18 +546,24 @@ export default createReducer(initialState, {
   [types.HANDLECSVLOADTABLES] (state) {
     const mapping = state.mapping;
     const tableData = [];
+    const tableRequiredFields = [];
     mapping.columns = _.map(state.preview.resultdata.headers, function(val){
       return {label: val, value: val};
     });
     let firsttable = '';
     for (firsttable in tables) break;
-
     const children = _.map(tables[firsttable].children, function(val, key) {
+      var requiredField = [];
+      for(let index in val){
+        if(val[index].isRequired && val[index].isRequired === true){
+          requiredField.push(index);
+        }
+      }
+      tableRequiredFields[key] = requiredField;
       return {label: key, value: key, children: []};
     });
 
     tableData.push({label: firsttable, value: firsttable, children: children});
-    
     mapping.tables = tableData;
     mapping.childTables = children;
 
@@ -561,6 +571,8 @@ export default createReducer(initialState, {
     
     mapping.currentTable = firsttable;
     getPropertiesoftable(firsttable, mapping);
+    tableRequiredFields[firsttable] = mapping.requiredProperty;
+    mapping.tableRequiredFields = tableRequiredFields;
     return {
       ...state,
       mapping
@@ -582,7 +594,7 @@ export default createReducer(initialState, {
     mapping.tableObject = '';
     mapping.currentProperty = '';
     mapping.remove = false;
-    getPropertiesoftable(table, mapping);
+    //getPropertiesoftable(table, mapping);
     return {
         ...state,
         mapping
@@ -623,6 +635,12 @@ export default createReducer(initialState, {
   },
   [types.HANDLECSVMAPREMOVE] (state) {
     const mapping = state.mapping;
+    let updatedMapData = [];
+    for(let k = 0; k < mapping.mappingData.length; k++) {
+      if(mapping.mappingData[k].actualTable !== mapping.tableObject){
+        test.push(mapping.mappingData[k]);
+      }
+    }
     for (let i = 0; i < mapping.childTables.length; i++) {
       for (let j = 0; j < mapping.childTables[i].children.length; j++) {
         if (mapping.childTables[i].children[j].value === mapping.tableObject) {
@@ -631,6 +649,7 @@ export default createReducer(initialState, {
         }
       }
     }
+    mapping.mappingData = test;
     mapping.properties = [];
     mapping.tableObject = '';
     mapping.remove = false;
@@ -722,7 +741,6 @@ export default createReducer(initialState, {
   },
   [types.HANDLEAUTOMAPPING] (state, action) {
     const mapping = autoMapping(state);
-    state.autoMap = true;
     return {
       ...state,
       mapping
@@ -730,6 +748,7 @@ export default createReducer(initialState, {
   },
   [types.SAVEMAPPEDDATASUCCESS] (state, action) {
     state.currentview = "import";
+    state.block = ['prev','next'];
     state.importer.convertedJSON = action.payload.response.convertedJSON;
     return {
       ...state
@@ -744,9 +763,9 @@ export default createReducer(initialState, {
     };
   },
   [types.HANDLECSVMAPTRANSFORMATION] (state, action) {
-    const {rowid, transformation} = action.payload;
+    const {rowid, transition} = action.payload;
     const mapping = state.mapping;
-    mapping.mappingData[rowid].transformations = transformation;
+    mapping.mappingData[rowid].transformations = transition;
     return {
       ...state,
       mapping
@@ -813,5 +832,11 @@ export default createReducer(initialState, {
     return {
       ...state
     };
+  },
+  [types.AUTOMAPCHECK] (state, action) {
+    state.autoMap = true;
+    return {
+      ...state
+    }
   }
 });

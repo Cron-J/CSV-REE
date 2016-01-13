@@ -38,7 +38,7 @@ class ListBox extends Component {
         style.paddingLeft = level * 9;
         if (data[i].value === value && isValidSelection) {
           style.fontSize = 17;
-          style.fontStyle = 'italic';
+          style.color = 'red';
         }
         const highlightstyle = this.getHiglightStyle(data[i].value);
         const newstyle = {...style, ...highlightstyle}

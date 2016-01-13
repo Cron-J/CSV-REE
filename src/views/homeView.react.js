@@ -122,7 +122,7 @@ class Home extends React.Component {
     this.actions.defaultValueChange(defaultValue);
   }
   onAutoMapping = () => {
-    this.actions.autoMapping();
+    //this.actions.autoMapping();
   }
   onSaveMappingData = (data) => {
     this.actions.saveMappedData(this.props);
@@ -141,10 +141,12 @@ class Home extends React.Component {
       this.actions.loadTables();
   }
   close = (e) => {
+    this.actions.autoMapCheck();
     this.actions.loadTables();
     this.show = false;
-    if(e.target.value == 'true')
+    if(e.target.value == 'true'){
       this.actions.autoMapping();
+    }
   }
   renderView = () => {
     switch(this.props.csv.currentview) {

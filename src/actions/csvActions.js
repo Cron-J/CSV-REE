@@ -7,10 +7,14 @@ export function changeView(view) {
 }
 
 export function editChangeView(view) {
-  alert(view);
   return { type: types.HANDLEEDITCHANGEVIEW, payload: { view } };
 }
 
+export function autoMapCheck(data) {
+  return { 
+    type: types.AUTOMAPCHECK 
+  };
+}
 export function loadMappingList() {
   return  {
     types: [types.LOADLIST, types.LOADLISTSUCCESS, types.LOADLISTFAIL],

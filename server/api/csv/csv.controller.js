@@ -615,7 +615,6 @@ var tableschema = {'product': {
 }*/
 exports.create =  function(req,res){
     let findTableInSchema = function(product,obj,mapper,schema){
-        console.log('product,obj,mapper,schema');
         var getparams =function (params, isempty) {
           let param = '';
           if(isempty !== '' && params.length > 0){
@@ -628,6 +627,7 @@ exports.create =  function(req,res){
           return param;
         };
         var getnexttransformation =function (tranformationarray,next){
+          //console.log('==tranformationarray===', tranformationarray);
           let tranfomationfunc = '';
           if(tranformationarray[next]){
             if(tranformationarray[next+1]){
@@ -653,17 +653,18 @@ exports.create =  function(req,res){
         }
         let assign = function (product,tablename,mapperfield,mapperuserfieldname,defaultValue,schema,obj,transformations) {
             let t = getnexttransformation(transformations,0);
-            console.log('......>', schema);
             for(let key in schema){
                 if(key === tablename && schema[key][mapperfield]){
                     let value = obj[mapperuserfieldname];
                     value = transformationsRefactor(transformations, value);
                     if(value === '' && defaultValue && defaultValue.length > 0){
                         product[mapperfield] = defaultValue;
-                        product[mapperfield] = transformationsRefactor(transformations, product[mapperfield]);
+                        if(transformations.length>0)
+                          product[mapperfield] = transformationsRefactor(transformations, product[mapperfield]);
                     }else{
                         product[mapperfield] = obj[mapperuserfieldname];
-                        product[mapperfield] = transformationsRefactor(transformations, product[mapperfield]);
+                        if(transformations.length>0)
+                          product[mapperfield] = transformationsRefactor(transformations, product[mapperfield]);
                     }
                 }
             }
@@ -724,7 +725,6 @@ exports.create =  function(req,res){
                   jsonObj && jsonObj.length < 2 ?times = jsonObj.length: times = 2;
                   if(jsonObj){
                       for(var i=0;i<times;i++){
-                        console.log('jsonObj---->', jsonObj[i]);
                           convertedJSON.push(csv_mapping(jsonObj[i],req.body.mapping.mappingData));
                       }
                   }else{

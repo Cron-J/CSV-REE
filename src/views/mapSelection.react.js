@@ -16,11 +16,13 @@ class MapSelection extends React.Component {
   renderoptions = () => {
     const options = [];
     if (this.props.tableobject && this.props.tableobject.length > 0) {
-      options.push(<option value={this.props.tableobject}>{this.props.tableobject}</option>);
+      if(this.props.tableobject !== 'product')
+        options.push(<option value={this.props.tableobject}>{this.props.tableobject}</option>);
     }
     if (this.props.data) {
       for (let i = 0; i < this.props.data.length; i++) {
-        options.push(<option value={this.props.data[i].value}>{this.props.data[i].label}</option>);
+        if(this.props.data[i].value !== 'product')
+          options.push(<option value={this.props.data[i].value}>{this.props.data[i].label}</option>);
       }
     }
     return options;
