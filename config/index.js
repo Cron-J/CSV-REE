@@ -18,6 +18,7 @@ config.set('public', 'public');
 
 config.set('server_host',  'localhost');
 config.set('server_port',  process.env.PORT || 4000);
+config.set('server_protocol', 'http');
 config.set('webpack_port', 3000);
 
 config.set('vendor_dependencies', [
@@ -53,7 +54,8 @@ config.set('globals', {
   '__DEV__'      : config.get('env') === 'development',
   '__PROD__'     : config.get('env') === 'production',
   '__DEBUG__'    : config.get('env') === 'development' && !argv.no_debug,
-  '__DEBUG_NW__' : !!argv.nw
+  '__DEBUG_NW__' : !!argv.nw,
+  'SERVER_ADDR'  : JSON.stringify(config.get('server_protocol') + '://' + config.get('server_host') + ':' + config.get('server_port') + '/')
 });
 
 // ------------------------------------
