@@ -17,9 +17,9 @@ config.set('dir_dist', 'dist');
 config.set('public', 'public');
 
 config.set('server_host',  'localhost');
-config.set('server_port',  process.env.PORT || 4000);
+config.set('server_port',  process.env.PORT || 4040);
 config.set('server_protocol', 'http');
-config.set('webpack_port', 3000);
+config.set('webpack_port', 3030);
 
 config.set('vendor_dependencies', [
   'history',
