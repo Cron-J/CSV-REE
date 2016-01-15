@@ -83,7 +83,50 @@ export function nextview() {
   };
 }
 
+function validateTable(table, actualTable, data){
+  let validate = false;
+  for(let i=0; i<data.csv.mapping.tableRequiredFields[table].length; i++){
+    let valid = false;
+    for(let j=0; j<data.csv.mapping.mappingData.length; j++){
+      if(data.csv.mapping.mappingData[j].actualTable === actualTable && data.csv.mapping.mappingData[j].field === data.csv.mapping.tableRequiredFields[table][i]){
+        valid = true;
+      }
+    }
+    validate = valid;
+  }
+  return validate;
+}
+
+function check(mappedTable, singlemapping){
+  for(let i=0; i<mappedTable.length; i++){
+    if(mappedTable[i].actualTable === singlemapping.actualTable)
+      return false;
+  }
+  return true;
+}
+
+function mappingValidation(data){
+  let mappedTable = [];
+  for(let i=0; i<data.csv.mapping.mappingData.length; i++){
+    let c = check(mappedTable, data.csv.mapping.mappingData[i]);
+    if(c)
+      mappedTable.push({'table':data.csv.mapping.mappingData[i].table,'actualTable':data.csv.mapping.mappingData[i].actualTable});
+  }
+  for(let table in data.csv.mapping.tableRequiredFields){
+    for(let i=0; i<mappedTable.length; i++){
+      if(mappedTable[i].table === table)
+        if(validateTable(table, mappedTable[i].actualTable, data)){
+          concole.log('next');
+        }else{
+          console.log('All required properties should be mapped.');
+          return messageActions.showmessages('All required properties should be mapped.', 'error');
+        }
+    }
+  }
+}
+
 export function saveMappedData(data) {
+  //return mappingValidation(data);
   if(data.params.id) {
     return updateMappedData(data.csv, data.params.id);
   } else {

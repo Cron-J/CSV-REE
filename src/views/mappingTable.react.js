@@ -12,6 +12,8 @@ class MappingTable extends Component {
 		this.props = nextProps;
 	}
 	removeRow = (rowid) => {
+		alert(rowid);
+		console.log('rowid', rowid);
 		if(this.props.onRemove) {
 			this.props.onRemove(rowid);
 		}

@@ -81,6 +81,8 @@ function blockers(view, data) {
 }
 
 function mappedColPro(state){
+  state.mappedProperty=[];
+  state.mappedColumn = [];
   for(let i=0; i<state.mappingData.length; i++){
     let obj = {};
     obj[state.mappingData[i].actualTable] = state.mappingData[i].field;
@@ -93,7 +95,6 @@ function mappedColPro(state){
           'label':state.mappingData[i].actualTable,
           'value':state.mappingData[i].actualTable 
         }
-        //alert(state.mappingData[i].table);
       }
     }
   }
@@ -123,10 +124,13 @@ function isSuccess(currentview, view, state) {
 }
 
 function formatDate(data, fromdateformat, todateformat) {
-  const momentdate = moment(data, fromdateformat);
-  if (momentdate.format(fromdateformat) === data) {
-    return momentdate.format(todateformat);
-  }
+  console.log("==data==", data);
+    const momentdate = moment(data, fromdateformat);
+    console.log("==1==",  momentdate);
+    if (momentdate.format(fromdateformat) === data) {
+      return momentdate.format(todateformat);
+    }
+  
   return data;
 }
 
@@ -346,7 +350,7 @@ function attributeMapping(mapping) {
     "userFieldName": mapping.currentColumn,
     "transformations": [],
     "field": 'value',
-    "defaultValue": mapping.defaultValue,
+    "defaultValue": '',
     "index": childIndex,
     "indx": mapping.mappingData.length,
     "instance": '',
@@ -358,7 +362,7 @@ function attributeMapping(mapping) {
     "userFieldName": '"'+mapping.currentColumn+'"',
     "transformations": [],
     "field": 'attribute',
-    "defaultValue": mapping.defaultValue,
+    "defaultValue": mapping.currentColumn,
     "index": childIndex,
     "indx": mapping.mappingData.length+1,
     "actualTable": tablename,
@@ -405,14 +409,15 @@ function autoMapping(currentState) {
 }
 
 function childTab(currentState){
-  let mappingData = currentState.mapping.mappedData;
+  console.log('currentState.mapping.mappedData--00--', currentState.mapping.mappedData);
+  /*let mappingData = currentState.mapping.mappedData;
   for(let i=0; i<mappingData.length; i++){
     for(let index=0; index<currentState.mapping.tables[0].children.length; index++){
       if(mappingData[i].table == currentState.mapping.tables[0].children[index].value){
         currentState.mapping.tables[0].children[index].children.push({'value':currentState.mapping.tables[0].children[index].value+'('+currentState.mapping.tables[0].children[index].children.length+')','label':currentState.mapping.tables[0].children[index].value+'('+currentState.mapping.tables[0].children[index].children.length+')'});
       }
     }
-  }
+  }*/
   return currentState.mapping.tables;
 }
 export default createReducer(initialState, {
@@ -521,7 +526,6 @@ export default createReducer(initialState, {
     };
   },
   [types.HANDLECSVPREVIEWNUMBER] (state, action) {
-    console.log('===>', state);
     const {numberformat} = action.payload;
     const preview = state.preview;
     preview.numberFormat = numberformat;
@@ -638,9 +642,10 @@ export default createReducer(initialState, {
     let updatedMapData = [];
     for(let k = 0; k < mapping.mappingData.length; k++) {
       if(mapping.mappingData[k].actualTable !== mapping.tableObject){
-        test.push(mapping.mappingData[k]);
+        updatedMapData.push(mapping.mappingData[k]);
       }
     }
+
     for (let i = 0; i < mapping.childTables.length; i++) {
       for (let j = 0; j < mapping.childTables[i].children.length; j++) {
         if (mapping.childTables[i].children[j].value === mapping.tableObject) {
@@ -649,7 +654,7 @@ export default createReducer(initialState, {
         }
       }
     }
-    mapping.mappingData = test;
+    mapping.mappingData = updatedMapData;
     mapping.properties = [];
     mapping.tableObject = '';
     mapping.remove = false;
@@ -721,12 +726,14 @@ export default createReducer(initialState, {
     }
   },
   [types.HANDLECSVMAPDATAREMOVE] (state, action) {
+    alert(action.payload);
     const { rowid } = action.payload;
-    const mapping = state.mapping;
-    mapping.mappingData.splice(rowid-1, 1);
+    let mapping = state.mapping;
+    mapping.mappingData.splice(rowid, 1);
     for (let i = 0; i < mapping.mappingData.length; i++) {
-      mapping.mappingData[i].index = i+1;
+      mapping.mappingData[i].indx = i;
     }
+    mapping = mappedColPro(mapping);
     return {
       ...state,
       mapping
@@ -798,13 +805,12 @@ export default createReducer(initialState, {
     state.mapping.mappingName = mapping.mappingName;
     state.mapping.mappedData = mapping.mappingInfo;
     state.mapping.mappingData = mapping.mappingInfo;
-    state.mapping.mappedData = mapping.tenantId;
+    state.mapping.tenantId = mapping.tenantId;
     state.mapping = mappedColPro(state.mapping);
     state.preview.resultdata = preview.resultdata = formatPreview(file, preview.delimiter, preview.noHeader, preview.numberFormat, preview.dateFormat, preview.dateFormat);
     state.mapping.columns = _.map(state.preview.resultdata.headers, function(val){
       return {label: val, value: val};
     });
-    state.mapping.tables = childTab(state);
     state.currentview = 'mapping';
     return {
       ...state

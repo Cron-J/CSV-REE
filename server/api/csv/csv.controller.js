@@ -657,7 +657,7 @@ exports.create =  function(req,res){
                 if(key === tablename && schema[key][mapperfield]){
                     let value = obj[mapperuserfieldname];
                     value = transformationsRefactor(transformations, value);
-                    if(value === '' && defaultValue && defaultValue.length > 0){
+                    if(defaultValue && defaultValue.length > 0){
                         product[mapperfield] = defaultValue;
                         if(transformations.length>0)
                           product[mapperfield] = transformationsRefactor(transformations, product[mapperfield]);
@@ -684,7 +684,12 @@ exports.create =  function(req,res){
                         product[mapper.table] = {};
                         product[mapper.table][mapperindex] = child;
                     }else{
-                        table[mapperindex] = child;
+                        for(let key in child){
+                        if(product[mapper.table][mapperindex] === undefined)
+                          product[mapper.table][mapperindex] = {};
+                        product[mapper.table][mapperindex][key] = child[key];
+                        }
+                        
                     }
                 }}
         }

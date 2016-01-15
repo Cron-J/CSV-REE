@@ -1,16 +1,16 @@
 var upperCase = function(str){
-	console.log('TupperCase', str);
-    return str.toString().toUpperCase();
+	if(str !== undefined)
+      return str.toString().toUpperCase();
 };
 
 var lowerCase = function(str){
-	console.log('TlowerCase', str);
-    return str.toString().toLowerCase();
+	if(str !== undefined)
+      return str.toString().toLowerCase();
 };
 
 var substring = function(str, param1, param2) {
-	console.log('Tsubstring', str);
-	return str.toString().substr(param1,param2);
+	if(str !== undefined)
+	  return str.toString().substr(param1,param2);
 }
 
 exports.upperCase = upperCase;

@@ -10,15 +10,15 @@ class Transformation extends Component {
 					name: 'subString',
 					params : [{type : 'text', value : '',pattern :  /^\d+$/, isvalid : false},
                     {type : 'text', value : '',pattern :  /^\d+$/, isvalid : false}]
-        },
-        upperCase: {
-        	name: 'upperCase',
-        	params: []
-        },
-        lowerCase: {
-        	name: 'lowerCase',
-        	params: []
-        }
+                },
+		        upperCase: {
+		        	name: 'upperCase',
+		        	params: []
+		        },
+		        lowerCase: {
+		        	name: 'lowerCase',
+		        	params: []
+		        }
 			}
 		}
 	}
