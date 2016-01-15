@@ -1,5 +1,5 @@
 import * as types from 'constants/ActionTypes';
-import * as messageActions from '../common/messagecomponent/actions/messageActions';
+import * as messageActions from '../common/messageComponent/actions/messageActions';
 import api from 'utils/api/csv';
 
 export function changeView(view) {

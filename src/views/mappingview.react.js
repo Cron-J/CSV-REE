@@ -2,7 +2,7 @@ import React, { Component, PropTypes } from 'react';
 import {Button, ButtonToolbar, Glyphicon, Input} from 'react-bootstrap';
 import ListBox from './listBox.react';
 import MapSelection from './mapSelection.react';
-import MappingTable from './mappingtable.react';
+import MappingTable from './mappingTable.react';
 import _ from 'underscore';
 
 class MappingView extends Component {
