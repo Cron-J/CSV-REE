@@ -31,7 +31,7 @@ const utils = {
   },
   saveMappedData: (data) => {
     return request({
-      url: "http://localhost:4000/api/csv",
+      url: SERVER_ADDR + 'api/csv',
       method: 'POST',
       json: true,
       body: data
