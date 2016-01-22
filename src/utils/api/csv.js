@@ -31,7 +31,7 @@ const utils = {
   },
   saveMappedData: (data) => {
     return request({
-      url: "http://localhost:4000/api/csv",
+      url: SERVER_ADDR + 'api/csv',
       method: 'POST',
       json: true,
       body: data
@@ -58,6 +58,13 @@ const utils = {
       json: true,
       body: data
     })
+  },
+  downloadData: (tenantId, id) => {
+    return request({
+      url: SERVER_ADDR + 'api/csv/download/' + id + '/' + tenantId,
+      method: 'GET',
+      json: true
+    });
   }
 }
 export default utils;

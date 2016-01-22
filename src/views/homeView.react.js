@@ -97,8 +97,8 @@ class Home extends React.Component {
   onTableChange = (table) => {
     this.actions.changeTable(table); 
   }
-  onTableSelect = (table) => {
-    this.actions.changeTableIndex(table);
+  onTableSelect = (table, index) => {
+    this.actions.changeTableIndex(table, index);
   }
   onPropertyChange = (property) => {
     this.actions.changeProperty(property);
@@ -148,6 +148,12 @@ class Home extends React.Component {
       this.actions.autoMapping();
     }
   }
+  downloadMappedData = () => {
+    this.actions.onDownload(this.props);
+  }
+  ignoreDefaultValue = () => {
+    this.actions.emptyDefaultValue();
+  }
   renderView = () => {
     switch(this.props.csv.currentview) {
     case this.upload:
@@ -174,10 +180,11 @@ class Home extends React.Component {
       onDefaultValueChange={this.onDefaultValueChange}
       onAutoMapping={this.onAutoMapping}
       onSaveMappingData = {this.onSaveMappingData}
+      ignoreDefaultValue = {this.ignoreDefaultValue}
       onChnageMappingName = {this.onChnageMappingName}/>;
       break;
     case this.import:
-      return <ImportView data={this.props.csv} onDataSubmit={this.onDataSubmit}/>;
+      return <ImportView data={this.props.csv} downloadMappedData={this.downloadMappedData} onDataSubmit={this.onDataSubmit}/>;
       break;
     default:
       return '';

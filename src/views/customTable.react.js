@@ -10,9 +10,9 @@ class Customtable extends React.Component {
   }
   getHeader = (header, isKey) => {
     if (header.value && header.label) {
-      return <TableHeaderColumn dataSort dataFormat={this.callback.bind(this, header.value)} isKey={isKey} dataField={header.value}>{header.label}</TableHeaderColumn>;
+      return <TableHeaderColumn dataSort  dataFormat={this.callback.bind(this, header.value)} isKey={isKey} dataField={header.value} className="ellipsis">{header.label}</TableHeaderColumn>;
     }
-    return <TableHeaderColumn dataSort dataFormat={this.callback.bind(this, header)} isKey={isKey} dataField={header}>{header}</TableHeaderColumn>;
+    return <TableHeaderColumn dataSort dataFormat={this.callback.bind(this, header)} isKey={isKey} dataField={header} className="ellipsis">{header}</TableHeaderColumn>;
   }
   callback = (header, data, row) => {
     if (this.props.customFunctions && this.props.customFunctions[header]) {
@@ -23,7 +23,7 @@ class Customtable extends React.Component {
   _renderColumn = () => {
     const tableheaders = [];
     let keyCount = 0;
-    for (let i = 0; i < this.props.headers.length; i++) {
+    for (let i = 0; i < 6; i++) {
       tableheaders.push(this.getHeader(this.props.headers[i], keyCount === 0));
       keyCount++;
     }

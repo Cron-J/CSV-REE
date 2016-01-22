@@ -25,17 +25,18 @@ class MappingView extends Component {
   }
   onColumnChange = (column) => {
     if (this.props.onColumnChange) {
-      this.props.onColumnChange(column);
+      this.props.onColumnChange(column.target.value);
     }
   }
   onTableSelect = (table) => {
+    let index = $(table.target).attr('data-index');
     if (this.props.onTableSelect) {
-      this.props.onTableSelect(table);
+      this.props.onTableSelect(table.target.value, index);
     }
   }
   onPropertyChange = (property) => {
     if (this.props.onPropertyChange) {
-      this.props.onPropertyChange(property);
+      this.props.onPropertyChange(property.target.value);
     }
   }
   onMapSelect = (value) => {
@@ -94,10 +95,16 @@ class MappingView extends Component {
     });
     return object;
   }
+  selectDefaultValue = () => {
+     if(!$('.default-value').hasClass('active')){
+      this.props.ignoreDefaultValue();
+    }
+  }
   renderPropertyHighlight = () => {
     let object = {};
+    const selectedChildTableIndex = this.props.data.map.selectedChildTableIndex;
     const mappedProperty = this.props.data.map.mappedProperty;
-    const selectedTable = this.props.data.map.selectedTable
+    const selectedTable = this.props.data.map.selectedTable.split('(');
     _.each(this.props.data.map.requiredProperty, function(val, index){
       if (!mappedProperty[val]) {
         object[val] = {color: '#31708f'};
@@ -105,8 +112,9 @@ class MappingView extends Component {
     });
     _.each(this.props.data.map.mappedProperty, function(val, index){
       for(let i in val){
-        if(selectedTable == i){
-          object[val[i]] = {color: '#3c763d'};
+        if(selectedTable[0] == i && val[i]['index'] == selectedChildTableIndex){
+          console.log('---pp---', val[i]['property']);
+          object[val[i]['property']] = {color: '#3c763d'};
         }
       }
     });
@@ -172,10 +180,7 @@ class MappingView extends Component {
         <div className="row">
           <div className="col-md-3">
             <div className="btn-group ">
-              <button type="button" className="btn btn-default default-value"  data-toggle="button"><span>Default value</span><span></span></button>
-              <a className="btn btn-default edit-icon"  onClick={this.clickForEdit}><span className="glyphicon glyphicon-pencil"></span></a>
-              <a className="btn btn-default hide ok-icon"><span className="glyphicon glyphicon-ok"></span></a>
-              <a className="btn btn-default"><span className="glyphicon glyphicon-question-sign"></span></a>
+              <button type="button" className="btn btn-default default-value"  onClick={this.selectDefaultValue} data-toggle="button"><span>Default value</span><span></span></button>
             </div>
             <form role="form">
               <div className="form-group">
@@ -213,7 +218,8 @@ MappingView.propTypes = {
   onDefaultValueChange: React.PropTypes.func,
   onSaveMappingData: React.PropTypes.func,
   onChnageMappingName: React.PropTypes.func,
-  onsaveTranformation: React.PropTypes.func
+  onsaveTranformation: React.PropTypes.func,
+  ignoreDefaultValue: React.PropTypes.ignoreDefaultValue
 };
 
 export default MappingView;

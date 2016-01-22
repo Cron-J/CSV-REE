@@ -12,8 +12,6 @@ class MappingTable extends Component {
 		this.props = nextProps;
 	}
 	removeRow = (rowid) => {
-		alert(rowid);
-		console.log('rowid', rowid);
 		if(this.props.onRemove) {
 			this.props.onRemove(rowid);
 		}
@@ -31,7 +29,10 @@ class MappingTable extends Component {
 		this.setState({showtransformations: false, transformations: []});
 	}
 	tabledataFormat = (data, row) => {
-		return row.actualTable + '.' + row.field;
+		if(row.ellipsis)
+		  return row.actualTable+'('+row.ellipsis.toString()+').' + row.field;
+		else
+		  return row.actualTable+'.' + row.field;
 	}
 	transformationsFormat = (data, row) => {
 		return <Button bsStyle="default" bsSize="xsmall" onClick={this.onTransformation.bind(this, row.transformations, row.indx)}><Glyphicon glyph="edit"/></Button>;;
@@ -50,7 +51,7 @@ class MappingTable extends Component {
 				 }}
 				 headers={[
 		              {value: 'userFieldName', label: 'Imported column'},
-		              {value: 'transformations', label: 'Transformation'},
+		              {value: 'transformations', label: 'Manufacturer Name'},
 		              {value: 'table', label: 'Property name'},
 		              {value: 'field', label: 'Property description'},
 		              {value: 'indx', label: 'Index'},

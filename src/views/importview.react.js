@@ -1,5 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import JSONTree from 'react-json-tree';
+import {Button} from 'react-bootstrap';
 
 class ImportView extends Component {
   constructor(props) {
@@ -9,9 +10,12 @@ class ImportView extends Component {
   componentWillReceiveProps(nextProps) {
     this.props = nextProps;
   }
+  
+  onDownload(){
+    this.props.downloadMappedData();
+  }
 
   render() {
-    console.log('Import---->', this.props.data);
     return (
             <div className="container">
                 <div className="row">
@@ -25,7 +29,8 @@ class ImportView extends Component {
                             Processing Json</div>
                        
                            <div>
-                             <pre>{<JSONTree data={ this.props.data.importer.convertedJSON }/>}</pre>                                                   
+                             <pre>{<JSONTree data={ this.props.data.importer.convertedJSON }/>}</pre>
+                             <Button bsStyle="primary" onClick={this.onDownload.bind(this)}>Download</Button>                                                   
                            </div>
                         
                         </div>
@@ -37,7 +42,8 @@ class ImportView extends Component {
 }
 
 ImportView.propTypes = {
-  data: React.PropTypes.object
+  data: React.PropTypes.object,
+  downloadMappedData: React.PropTypes.func
 };
 
 export default ImportView;

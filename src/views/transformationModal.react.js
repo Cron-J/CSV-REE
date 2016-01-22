@@ -5,9 +5,11 @@ import Transformations from './transformations.react';
 class TransformationModal extends Component {
 	constructor(props) {
 		super(props);
-		this.state = {transformations: props.transformations};
+		this.state = {transformations: this.props.transformations};
 	}
+
 	componentWillReceiveProps(nextProps) {
+		this.setState({transformations: this.props.transformations});
 		this.props = nextProps;
 	}
 	onTransformationSave = () => {
@@ -26,6 +28,7 @@ class TransformationModal extends Component {
 			change.transformations[transformationid] = transformationdata;
 		} else {
 			change.transformations.push(transformationdata);
+			this.props.transformations.push(transformationdata);
 		}
 		this.setState(change);
 	}
@@ -38,8 +41,8 @@ class TransformationModal extends Component {
 	}
 	renderTransformation = () => {
 		let transformationsComp = [];
-		for (let i = 0; i < this.state.transformations.length; i++) {
-			transformationsComp.push(<Transformations id={i} onRemove={this.onTransformationRemove} onEdit={this.onTransformation} transformation={this.state.transformations[i]}/>);
+		for (let i = 0; i < this.props.transformations.length; i++) {
+			transformationsComp.push(<Transformations id={i} onRemove={this.onTransformationRemove} onEdit={this.onTransformation} transformation={this.props.transformations[i]}/>);
 		}
 		transformationsComp.push(<Transformations onRemove={this.onTransformationRemove} onEdit={this.onTransformation} transformation={{}}/>);
 		return transformationsComp;

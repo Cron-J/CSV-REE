@@ -15,6 +15,7 @@ class MapSelection extends React.Component {
   }
   renderoptions = () => {
     const options = [];
+    options.push(<option value=''>Select table</option>);
     if (this.props.tableobject && this.props.tableobject.length > 0) {
       if(this.props.tableobject !== 'product')
         options.push(<option value={this.props.tableobject}>{this.props.tableobject}</option>);
@@ -32,10 +33,13 @@ class MapSelection extends React.Component {
       this.props.onAdd();
     }
   }
-  onRemove = () => {
+  onRemove = (e) => {
     if (this.props.onRemove) {
       this.props.onRemove();
     }
+  }
+  selfun = (e) => {
+    alert(e.target.value);
   }
   renderButton = () => {
     if (this.props.remove) {
@@ -53,7 +57,7 @@ class MapSelection extends React.Component {
     return (
       <div>
         <div className="col-md-8">
-          <Input type="select" placeholder="select table" value={this.renderValue()} onChange={this.onSelectionChange}>
+          <Input type="select" placeholder="select table" value={this.renderValue()}  onChange={this.onSelectionChange}>
             {this.renderoptions()}
           </Input>
         </div>

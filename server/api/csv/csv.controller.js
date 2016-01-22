@@ -4,6 +4,7 @@ var models = require('../../models'),
     common = require('../../utils/common.js'),
     staticData = require('../../utils/staticData.js'),
     trans = require('../../utils/transformation.js'),
+    synonym = require('../../utils/synonyms.js'),
     cc = require('currency-codes'),
     fs = require('fs'),
     Converter = require("csvtojson").Converter;
@@ -54,6 +55,7 @@ exports.getMapping = function(req, res) {
     console.log("==Error==", error);
   });
 }
+
 // Get csv file data for mapping
 exports.getMappingCSVData = function(req, res) {
   models.mapping.find({where: {id: req.params.id, tenantId: req.params.tenantId}}).then(function(result){
@@ -607,14 +609,217 @@ var tableschema = {'product': {
         }
     }
 }};
+
 /*
   API to create the Mapping.
 */
-/*exports.create =  function(req,res){
-    console.log('mapping data', req.body);
-}*/
 exports.create =  function(req,res){
-    let findTableInSchema = function(product,obj,mapper,schema){
+   
+    
+  models.mapping.create({
+    attributeId: req.body.upload.fileName,
+    tenantId: '2',
+    fileName: req.body.upload.fileName,
+    mappingInfo: req.body.mapping.mappingData,
+    delimeter: req.body.preview.delimeter,
+    mappingName : req.body.mapping.mappingName
+  }).then(function(result){
+      models.mapping.find({where: {id: result.id}}).then(function(mappings, err) {
+          if (!err) {
+              var upload_path = 'uploads/' + req.body.upload.fileName;
+              var fileStream = fs.createReadStream(upload_path);
+              //new converter instance
+              var csvConverter = new Converter({
+                  constructResult: true
+              });
+              //res.send(mappings);
+              //return;
+              //end_parsed will be emitted once parsing finished
+              csvConverter.on("end_parsed", function(jsonObj) {
+
+                 var convertedJSON = [],error = {};
+                 var times=0;
+                  jsonObj && jsonObj.length < 2 ?times = jsonObj.length: times = 2;
+                  if(jsonObj){
+                      for(var i=0;i<times;i++){
+                          convertedJSON.push(csv_mapping(jsonObj[i],req.body.mapping.mappingData));
+                      }
+                  }else{
+                      error.message = "Error : Couldnot process the CSV file.";
+                  }
+                  res.send({'id':mappings.id, 'tenantId':mappings.tenantId, 'convertedJSON': convertedJSON,'error': error});
+              });
+              fileStream.pipe(csvConverter);
+          }
+          else {
+              res.send(err);
+          }
+      }).catch(function (err) {
+          console.log(err);
+      });
+  }).catch(function(error){
+    res.status(500).json(error);
+  });
+};
+
+// Edit Mapping
+exports.update =  function(req,res){
+  var data = req.body;
+  models.mapping.find({
+    where: {tenantId:req.params.tenantId, id: req.params.id}
+  }).then(function(mapping){
+    mapping.updateAttributes({
+      tenantId: req.params.tenantId,
+      mappingInfo: data.mapping.mappingData,
+      mappingName : data.mapping.mappingName
+    }).then(function(mapping){
+      var upload_path = 'uploads/' + mapping.fileName;
+      var fileStream = fs.createReadStream(upload_path);
+      var csvConverter = new Converter({
+          constructResult: true
+      });
+      csvConverter.on("end_parsed", function(jsonObj) {
+        var convertedJSON = [],error = {};
+        var times=0;
+        jsonObj && jsonObj.length < 2 ?times = jsonObj.length: times = 2;
+        if(jsonObj){
+          for(var i=0;i<times;i++){
+            convertedJSON.push(csv_mapping(jsonObj[i],mapping.mappingInfo));
+          }
+        }else{
+          error.message = "Error : Couldnot process the CSV file.";
+        }
+          res.send({'id':mapping.id, 'tenantId':mapping.tenantId, 'convertedJSON': convertedJSON,'error': error});
+      });
+      fileStream.pipe(csvConverter);
+    });
+  }).catch(function(error){
+    res.status(404).json(error)
+  });
+}
+
+// Deprecated
+exports.uploadFileData = function(req, res) {
+  var data = req.body;
+
+  if (data.length === undefined) {
+      res.json('Please Upload the file');
+  } else {
+    var path = 'uploads';
+    fs.mkdir(path, function(e) {
+        if (!e || (e && e.code === 'EEXIST')) {
+            var fileName = req.body.file_name + new Date().getTime();
+            var upload_path = path + '/' + req.body.file_name + new Date().getTime();
+            fs.writeFileSync(upload_path, data);
+            fs.readFile(upload_path, 'utf8', function(err, data) {
+                if (err) {
+                    return console.log(err);
+                }
+                res.status(200).json(csvJSON(data, fileName));
+            });
+        } else {
+            res.status(500).json();
+        }
+    });
+  }
+};
+
+exports.uploadFileData = function(req, res) {
+  var fileName = req.body.name;
+  fs.readFile(upload_path, 'utf8', function(err, data) {
+    if (err) {
+      return console.log(err);
+    }
+    res.status(200).json(csvJSON(data, fileName));
+  });
+}
+
+
+/*
+  API to download preview data.
+*/
+exports.download = function(req, res) {
+  models.mapping.find({
+    where: {tenantId:req.params.tenantId, id: req.params.id}
+  }).then(function(mappings, err) {
+          if (!err) {
+              var upload_path = 'uploads/' + mappings.fileName;
+              var fileStream = fs.createReadStream(upload_path);
+              var csvConverter = new Converter({
+                  constructResult: true
+              });
+              csvConverter.on("end_parsed", function(jsonObj) {
+
+                 var convertedJSON = [],error = {};
+                 var times=0;
+                  jsonObj && jsonObj.length < 2 ?times = jsonObj.length: times = jsonObj.length;
+                  if(jsonObj){
+                      for(var i=0;i<times;i++){
+                          convertedJSON.push(csv_mapping(jsonObj[i],mappings.mappingInfo));
+                      }
+                  }else{
+                      error.message = "Error : Couldnot process the CSV file.";
+                  }
+                  //res.send({'convertedJSON': convertedJSON,'error': error});
+                  getInFile(convertedJSON,req,res);
+              });
+              fileStream.pipe(csvConverter);
+          }
+          else {
+              res.send(err);
+          }
+      }).catch(function (err) {
+          console.log(err);
+      });
+}
+
+/*
+  API to get list of Synonyms.
+*/
+exports.synonyms = function(req, res) {
+    res.json({'result': synonym.synonymsList()});
+}
+
+
+/*
+  Common function
+*/
+
+function csvJSON(csv, fileName) {
+    var lines = csv.split("\n");
+    var result = {};
+    result.fileName = fileName;
+    if(lines[0])
+        result.headers = lines[0].split("\r")[0];
+    if(lines[1])
+        result.rowOne = lines[1].split("\r")[0];
+    if(lines[2])
+        result.rowTwo = lines[2].split("\r")[0];
+    return result; //JSON
+}
+
+function getInFile(data,req,res){
+    var path = 'uploads/mappedData.json';
+    fs.openSync(path, 'w')
+    fs.writeFileSync(path,JSON.stringify(data, null, 4));
+    fs.readFile(path, 'utf8', function(err, data) {
+        if (err) {
+            return console.log(err);
+        }
+        res.download(path);
+    });
+}
+
+let csv_mapping = function (obj,mappinginfo) {
+        let product = {},schema = tableschema;
+        for(let i=0;i<mappinginfo.length;i++){
+            let mapper = mappinginfo[i];
+            product = findTableInSchema(product,obj,mapper,schema);
+        }
+        return product;
+    };
+
+let findTableInSchema = function(product,obj,mapper,schema){
         var getparams =function (params, isempty) {
           let param = '';
           if(isempty !== '' && params.length > 0){
@@ -695,143 +900,3 @@ exports.create =  function(req,res){
         }
         return product;
     };
-    
-    let csv_mapping = function (obj,mappinginfo) {
-        let product = {},schema = tableschema;
-        for(let i=0;i<mappinginfo.length;i++){
-            let mapper = mappinginfo[i];
-            product = findTableInSchema(product,obj,mapper,schema);
-        }
-        return product;
-    };
-  models.mapping.create({
-    attributeId: req.body.upload.fileName,
-    tenantId: '2',
-    fileName: req.body.upload.fileName,
-    mappingInfo: req.body.mapping.mappingData,
-    delimeter: req.body.preview.delimeter,
-    mappingName : req.body.mapping.mappingName
-  }).then(function(result){
-      models.mapping.find({tenantId:'2', mappingName: req.body.mapping.mappingName}).then(function(mappings, err) {
-          if (!err) {
-              var upload_path = 'uploads/' + req.body.upload.fileName;
-              var fileStream = fs.createReadStream(upload_path);
-              //new converter instance
-              var csvConverter = new Converter({
-                  constructResult: true
-              });
-              //res.send(mappings);
-              //return;
-              //end_parsed will be emitted once parsing finished
-              csvConverter.on("end_parsed", function(jsonObj) {
-
-                 var convertedJSON = [],error = {};
-                 var times=0;
-                  jsonObj && jsonObj.length < 2 ?times = jsonObj.length: times = 2;
-                  if(jsonObj){
-                      for(var i=0;i<times;i++){
-                          convertedJSON.push(csv_mapping(jsonObj[i],req.body.mapping.mappingData));
-                      }
-                  }else{
-                      error.message = "Error : Couldnot process the CSV file.";
-                  }
-                  res.send({'convertedJSON': convertedJSON,'error': error});
-              });
-              fileStream.pipe(csvConverter);
-          }
-          else {
-              res.send(err);
-          }
-      }).catch(function (err) {
-          console.log(err);
-      });
-  }).catch(function(error){
-    res.status(500).json(error);
-  });
-};
-
-// Edit Mapping
-exports.update =  function(req,res){
-  var data = req.body;
-  models.mapping.find({
-    where: {tenantId:req.params.tenantId, id: req.params.id}
-  }).then(function(mapping){
-    mapping.updateAttributes({
-      tenantId: req.params.tenantId,
-      mappingInfo: data.mapping.mappingData,
-      mappingName : data.mapping.mappingName
-    }).then(function(mapping){
-      res.json(204)
-    });
-  }).catch(function(error){
-    res.status(404).json(error)
-  });
-}
-
-// Deprecated
-exports.uploadFileData = function(req, res) {
-  var data = req.body;
-
-  if (data.length === undefined) {
-      res.json('Please Upload the file');
-  } else {
-    var path = 'upload';
-    fs.mkdir(path, function(e) {
-        if (!e || (e && e.code === 'EEXIST')) {
-            var fileName = req.body.file_name + new Date().getTime();
-            var upload_path = path + '/' + req.body.file_name + new Date().getTime();
-            fs.writeFileSync(upload_path, data);
-            fs.readFile(upload_path, 'utf8', function(err, data) {
-                if (err) {
-                    return console.log(err);
-                }
-                res.status(200).json(csvJSON(data, fileName));
-            });
-        } else {
-            res.status(500).json();
-        }
-    });
-  }
-};
-
-exports.uploadFileData = function(req, res) {
-  var fileName = req.body.name;
-  fs.readFile(upload_path, 'utf8', function(err, data) {
-    if (err) {
-      return console.log(err);
-    }
-    res.status(200).json(csvJSON(data, fileName));
-  });
-}
-function csvJSON(csv, fileName) {
-    var lines = csv.split("\n");
-    var result = {};
-    result.fileName = fileName;
-    if(lines[0])
-        result.headers = lines[0].split("\r")[0];
-    if(lines[1])
-        result.rowOne = lines[1].split("\r")[0];
-    if(lines[2])
-        result.rowTwo = lines[2].split("\r")[0];
-    return result; //JSON
-}
-
-exports.synonyms = function(req, res) {
-    var synonyms = {
-        'tenantId': {'tableName':'product','synonyms':['tenant','tenantid', 'tenantno', 'tenant no']},
-        'productId': {'tableName':'product','synonyms':['product', 'productid', 'productno', 'product no']},
-        'supplierId': {'tableName':'product','synonyms':['supplier', 'supplierid', 'supplierno', 'supplierno']},
-        'mfgProductId': {'tableName':'product','synonyms':['mfgProduct', 'mfgproductid', 'mfgproductno', 'mfgproduct no']},
-        'manufacturerId': {'tableName':'product','synonyms':['manufacturer', 'manufacturerid', 'manufacturerno', 'manufacturer no']},
-        'extProductId': {'tableName':'product','synonyms':['extProduct', 'extProductid', 'extproductno', 'extproduct no']},
-        'variantId': {'tableName':'variants','synonyms':['variant', 'variantid', 'variantno', 'variant no']},
-        'languageId': {'tableName':'tableName','synonyms':['language', 'languageid', 'languageno', 'language no']},
-        'classificationId': {'tableName':'classificationGroupAssociations','synonyms':['classification', 'classificationid', 'classificationno', 'classification no']},
-        'classificationGroupId': {'tableName':'classificationGroupAssociations','synonyms':['classificationGroup', 'classificationGroupid', 'classificationGroupno', 'classificationGroup no']},
-        'extClassificationId': {'tableName':'contractedProducts','synonyms':['extClassification', 'extClassificationid', 'extClassificationno', 'extClassification no']},
-        'extClassificationGroupId': {'tableName':'contractedProducts','synonyms':['extClassificationGroup','extClassificationno', 'extClassificationGroupid', 'extClassification no']},
-        'priceTypeId': {'tableName':'prices','synonyms':['priceType', 'priceTypeid', 'priceTypeno', 'priceType no']},
-        'relatedProductId': {'tableName':'productRelations','synonyms':['relatedProduct', 'relatedProductid', 'relatedProductno', 'relatedProduct no']}
-    }
-    res.json({'result': synonyms});
-}

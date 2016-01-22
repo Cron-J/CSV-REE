@@ -6,6 +6,9 @@ export function changeView(view) {
   return { type: types.HANDLECHANGEVIEW, payload: { view } };
 }
 
+export function emptyDefaultValue(){
+  return {type: types.HANDLEEMPTYDEFAULTVALUE};
+}
 export function editChangeView(view) {
   return { type: types.HANDLEEDITCHANGEVIEW, payload: { view } };
 }
@@ -22,6 +25,16 @@ export function loadMappingList() {
       response: api.getMappingList().then(response => response)
     }
   };
+}
+
+export function onDownload(data) {
+  window.open(SERVER_ADDR+'api/csv/download/'+data.csv.importer.id+'/'+data.csv.importer.tenantId);
+  /*return  {
+    types: [types.DOWNLOADDATA, types.DOWNLOADDATASUCCESS, types.DOWNLOADDATAFAIL],
+    payload: {
+      response: api.downloadData(data.csv.importer.tenantId, data.csv.importer.id).then(response => response)
+    }
+  };*/
 }
 
 export function redirectEdit(id) {
@@ -88,7 +101,8 @@ function validateTable(table, actualTable, data){
   for(let i=0; i<data.csv.mapping.tableRequiredFields[table].length; i++){
     let valid = false;
     for(let j=0; j<data.csv.mapping.mappingData.length; j++){
-      if(data.csv.mapping.mappingData[j].actualTable === actualTable && data.csv.mapping.mappingData[j].field === data.csv.mapping.tableRequiredFields[table][i]){
+      let mapActualTable = data.csv.mapping.mappingData[j].actualTable+'('+data.csv.mapping.mappingData[j].index+')';
+      if(mapActualTable === actualTable && data.csv.mapping.mappingData[j].field === data.csv.mapping.tableRequiredFields[table][i]){
         valid = true;
       }
     }
@@ -97,40 +111,46 @@ function validateTable(table, actualTable, data){
   return validate;
 }
 
-function check(mappedTable, singlemapping){
+function check(mappedTable, actualTable){
   for(let i=0; i<mappedTable.length; i++){
-    if(mappedTable[i].actualTable === singlemapping.actualTable)
+    if(mappedTable[i].actualTable === actualTable)
       return false;
   }
   return true;
 }
 
 function mappingValidation(data){
+  let valid = false;
   let mappedTable = [];
   for(let i=0; i<data.csv.mapping.mappingData.length; i++){
-    let c = check(mappedTable, data.csv.mapping.mappingData[i]);
+    let actualTable = data.csv.mapping.mappingData[i].actualTable+'('+data.csv.mapping.mappingData[i].index+')';
+    let c = check(mappedTable, actualTable);
     if(c)
-      mappedTable.push({'table':data.csv.mapping.mappingData[i].table,'actualTable':data.csv.mapping.mappingData[i].actualTable});
+      mappedTable.push({'table':data.csv.mapping.mappingData[i].table,'actualTable':actualTable});
   }
   for(let table in data.csv.mapping.tableRequiredFields){
     for(let i=0; i<mappedTable.length; i++){
       if(mappedTable[i].table === table)
         if(validateTable(table, mappedTable[i].actualTable, data)){
-          concole.log('next');
+          valid = true;
         }else{
-          console.log('All required properties should be mapped.');
-          return messageActions.showmessages('All required properties should be mapped.', 'error');
+          valid = false;
+          return valid;
         }
     }
   }
+  return valid;
 }
 
 export function saveMappedData(data) {
-  //return mappingValidation(data);
-  if(data.params.id) {
-    return updateMappedData(data.csv, data.params.id);
-  } else {
-    return createMappedData(data.csv);
+  if(mappingValidation(data)){
+    if(data.params.id) {
+      return updateMappedData(data.csv, data.params.id);
+    } else {
+      return createMappedData(data.csv);
+    }
+  }else{
+    return messageActions.showmessages('All required properties should be mapped.', 'error');
   }
 }
 
@@ -241,11 +261,12 @@ export function previousview() {
   };
 }
 
-export function changeTableIndex(table) {
+export function changeTableIndex(table, index) {
   return {
     type: types.HANDLECSVMAPTABLEINDEXCHANGE,
     payload: {
-      table
+      table,
+      index
     }
   };
 }

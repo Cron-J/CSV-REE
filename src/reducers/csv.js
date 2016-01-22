@@ -57,7 +57,8 @@ const initialState = {
     mappingData: [],
     mappedColumn: [],
     mappedProperty: [],
-    requiredProperty: []
+    requiredProperty: [],
+    selectedChildTableIndex: ''
   },
   synonymsList: [],
   importer: {},
@@ -80,20 +81,60 @@ function blockers(view, data) {
   }
 }
 
+function updateIndexes(mapping){
+  for(let i=0; i<mapping.childTables.length; i++){
+    for(let j=0; j<mapping.childTables[i].children.length; j++){
+      mapping.childTables[i].children[j].index = j;
+    }
+  }
+  return mapping;
+}
+
+function mappingChildTableIndex(mapping,table){
+  for(let i=0; i<mapping.mappingData.length; i++){
+    mapping.mappingData[i].indx = i;
+    if(mapping.mappingData[i].table == table && mapping.mappingData[i].index>0){
+      mapping.mappingData[i].index = mapping.mappingData[i].index -1;
+    }
+  }
+  return mapping;
+}
+
+function updateEllipsis(mapping){
+  for(let i=0; i<mapping.mappingData.length; i++){
+    for(let j=0; j<mapping.childTables.length; j++){
+      if(mapping.mappingData[i].table == mapping.childTables[j].value){
+        if(!mapping.childTables[j].children[mapping.mappingData[i].index].ellipsis)
+          mapping.childTables[j].children[mapping.mappingData[i].index].ellipsis = [];
+        mapping.childTables[j].children[mapping.mappingData[i].index].ellipsis = mapping.mappingData[i].ellipsis;
+      }
+    }
+  }
+  mapping = mappedColPro(mapping);
+  return mapping;
+}
+
 function mappedColPro(state){
   state.mappedProperty=[];
   state.mappedColumn = [];
+  console.log(state.mappingData);
   for(let i=0; i<state.mappingData.length; i++){
     let obj = {};
-    obj[state.mappingData[i].actualTable] = state.mappingData[i].field;
+    let ellipsis = state.mappingData[i].ellipsis;
+    let selectedTableIndex = state.mappingData[i].index;
+    obj[state.mappingData[i].table] = {'property':state.mappingData[i].field, 'index': state.mappingData[i].index};
     state.mappedProperty.push(obj);
     state.mappedColumn.push(state.mappingData[i].userFieldName);
-    for(let index=0; index<state.tables[0].children.length; index++){
-      if(state.tables[0].children[index].value == state.mappingData[i].table){
-        state.tables[0].children[index].children[state.mappingData[i].index] = {
+    for(let index=0; index<state.childTables.length; index++){
+      if(state.childTables[index].value == state.mappingData[i].table){
+        state.childTables[index].children[state.mappingData[i].index] = 
+        {
           'children': [],
           'label':state.mappingData[i].actualTable,
-          'value':state.mappingData[i].actualTable 
+          'value':state.mappingData[i].actualTable,
+          'index': state.mappingData[i].index,
+          'ellipsis': state.mappingData[i].ellipsis
+
         }
       }
     }
@@ -124,9 +165,7 @@ function isSuccess(currentview, view, state) {
 }
 
 function formatDate(data, fromdateformat, todateformat) {
-  console.log("==data==", data);
     const momentdate = moment(data, fromdateformat);
-    console.log("==1==",  momentdate);
     if (momentdate.format(fromdateformat) === data) {
       return momentdate.format(todateformat);
     }
@@ -303,12 +342,25 @@ function getChildTableAndIndex (tablename) {
 }
 
 function mapData(mapping){
+  let currentTable = mapping.selectedTable.split('(');
+  let valueobject = {};
+  let ellips;
+  for (let i = 0; i < mapping.childTables.length; i++) {
+    if (mapping.childTables[i].value === currentTable[0]) {
+      console.log('===',mapping.childTables)
+      if(!mapping.childTables[i].children[mapping.selectedChildTableIndex].ellipsis){
+        mapping.childTables[i].children[mapping.selectedChildTableIndex].ellipsis = [];
+      }
+      mapping.childTables[i].children[mapping.selectedChildTableIndex].ellipsis.push(mapping.currentColumn);
+      ellips = mapping.childTables[i].children[mapping.selectedChildTableIndex].ellipsis;
+      break;
+    }
+  }
   mapping.mappedColumn.push(mapping.currentColumn);
   let obj = {};
-  obj[mapping.selectedTable] = mapping.currentProperty;
+  obj[currentTable[0]] = {'property': mapping.currentProperty, 'index': mapping.selectedChildTableIndex};
   mapping.mappedProperty.push(obj);
-  let index = getChildTableAndIndex(mapping.selectedTable);
-  let currentTable = mapping.selectedTable.split('(');
+  //let index = getChildTableAndIndex(mapping.selectedTable);
   mapping.mappingData.push({
       "userFieldName": mapping.currentColumn,
       "transformations": [],
@@ -316,14 +368,14 @@ function mapData(mapping){
       "field": mapping.currentProperty,
       "actualTable": mapping.selectedTable,
       "defaultValue": mapping.defaultValue,
-      "index": index,
+      "index": mapping.selectedChildTableIndex,
       'indx': mapping.mappingData.length,
+      'ellipsis': ellips,
       "instance": '',
       "isRequired": ''
     });
   return mapping;
 }
-
 function attributeMapping(mapping) {
   mapping.currentTable = 'attributeValues'
     let index = -1;
@@ -340,8 +392,8 @@ function attributeMapping(mapping) {
     }
     if (index > -1) {
       const length = mapping.childTables[index].children.length;
-      tablename = mapping.currentTable + '(' + length + ')';
-      valueobject.children.push({label: tablename, value: tablename});
+      tablename = mapping.currentTable;
+      valueobject.children.push({label: tablename, value: tablename, ellipsis:[mapping.currentColumn], index:length});
       mapping.childTables[index] = valueobject;
       mapping.tableObject = tablename;
       mapping.remove = true;
@@ -356,8 +408,12 @@ function attributeMapping(mapping) {
     "instance": '',
     "actualTable": tablename,
     "table": 'attributeValues',
+    "ellipsis":[mapping.currentColumn],
     "isRequired": true
   };
+  let obj = {};
+  obj[mapField1.table] = {'property': 'value', 'index': childIndex};
+  mapping.mappedProperty.push(obj);
   const mapField2 = {
     "userFieldName": '"'+mapping.currentColumn+'"',
     "transformations": [],
@@ -367,9 +423,13 @@ function attributeMapping(mapping) {
     "indx": mapping.mappingData.length+1,
     "actualTable": tablename,
     "instance": '',
+    "ellipsis":[mapping.currentColumn],
     "table": 'attributeValues',
     "isRequired": true
   };
+  let obj1 = {};
+  obj1[mapField2.table] = {'property': 'attribute', 'index': childIndex};
+  mapping.mappedProperty.push(obj1);
   mapping.mappedColumn.push(mapping.currentColumn);
   mapping.mappingData.push(mapField1);
   mapping.mappingData.push(mapField2);
@@ -379,12 +439,16 @@ function attributeMapping(mapping) {
 function autoMapping(currentState) {
   let synonymsList = currentState.synonymsList;
     for(let i in currentState.mapping.columns){
+
       for( let index in synonymsList){
+
         for(let indx in synonymsList[index].synonyms){
+
           let column =  currentState.mapping.columns[i].value;
-          if(synonymsList[index].synonyms[indx] === column.toLowerCase()){
+          if(synonymsList[index].synonyms[indx] == column.toLowerCase()){
+
             let obj = {};
-            obj[synonymsList[index].tableName] = index;
+            obj[synonymsList[index].tableName] = {'property': index, 'index': '0'};
             currentState.mapping.mappedProperty.push(obj);
             currentState.mapping.mappedColumn.push(column);
             currentState.mapping.mappingData.push({
@@ -404,7 +468,7 @@ function autoMapping(currentState) {
       }
       break;
     }
-    
+  currentState.mapping.selectedTable = 'product';
   return currentState.mapping;
 }
 
@@ -445,7 +509,6 @@ export default createReducer(initialState, {
   [types.HANDLECSVUPLOADSUCCESS] (state, action) {
     let fileName = action.payload.response.body.fileName;
     const {response} = action.payload;
-    console.log('afetr file upload response', response);
     const preview = state.preview;
     const upload = state.upload;
     const index = state.order.indexOf(state.currentview);
@@ -626,8 +689,8 @@ export default createReducer(initialState, {
     }
     if (index > -1) {
       const length = mapping.childTables[index].children.length;
-      const tablename = mapping.currentTable + '(' + length + ')';
-      valueobject.children.push({label: tablename, value: tablename});
+      const tablename = mapping.currentTable;
+      valueobject.children.push({label: tablename, value: tablename, index:length, ellipsis:[]});
       mapping.childTables[index] = valueobject;
       mapping.tableObject = tablename;
       mapping.remove = true;
@@ -638,37 +701,53 @@ export default createReducer(initialState, {
     };
   },
   [types.HANDLECSVMAPREMOVE] (state) {
-    const mapping = state.mapping;
+    let mapping = state.mapping;
+    let mappedColumns = [];
     let updatedMapData = [];
     for(let k = 0; k < mapping.mappingData.length; k++) {
-      if(mapping.mappingData[k].actualTable !== mapping.tableObject){
+      if(mapping.mappingData[k].actualTable == mapping.currentTable){
+        if(mapping.mappingData[k].index != mapping.selectedChildTableIndex){
+          updatedMapData.push(mapping.mappingData[k]);
+          mappedColumns.push(mapping.mappingData[k].userFieldName);
+        }
+      }else{
         updatedMapData.push(mapping.mappingData[k]);
+        mappedColumns.push(mapping.mappingData[k].userFieldName);
       }
+
     }
 
     for (let i = 0; i < mapping.childTables.length; i++) {
       for (let j = 0; j < mapping.childTables[i].children.length; j++) {
-        if (mapping.childTables[i].children[j].value === mapping.tableObject) {
+        if (mapping.childTables[i].children[j].value === mapping.currentTable) {
           mapping.childTables[i].children.splice(j, 1);
           break;
         }
       }
     }
     mapping.mappingData = updatedMapData;
+    mapping.mappedColumn = mappedColumns;
+    mapping = mappingChildTableIndex(mapping,mapping.currentTable);
+    mapping = updateIndexes(mapping);
     mapping.properties = [];
     mapping.tableObject = '';
     mapping.remove = false;
+    mapping = updateEllipsis(mapping);
     return {
       ...state,
       mapping
     };
   },
   [types.HANDLECSVMAPTABLEINDEXCHANGE] (state, action) {
-    let {table} = action.payload;
+    let tableObject = action.payload.table;
+    let tabl = tableObject.split('(');
+    let table = tabl[0];
+    let index = action.payload.index;
     table = table ? table : '';
 
     const mapping = state.mapping;
     mapping.selectedTable = table;
+    mapping.selectedChildTableIndex = index;
     let isPrimarytable = false;
     for (let i = 0; i < mapping.tables.length; i++) {
       if (mapping.tables[i].value === table) {
@@ -678,13 +757,13 @@ export default createReducer(initialState, {
     }
     mapping.currentProperty='';
     if (!isPrimarytable) {
-      mapping.tableObject = table;
+      mapping.tableObject = tableObject;
       const tableName = getTableName(mapping.childTables, table);
       getPropertiesoftable(tableName, mapping);
       mapping.remove = table.length > 0 ? true : false;
     } else {
       mapping.tableObject = mapping.tables[0].value;
-      getPropertiesoftable(mapping.tableObject, mapping);
+      getPropertiesoftable(table, mapping);
       mapping.remove = false;
     }
     
@@ -699,6 +778,7 @@ export default createReducer(initialState, {
     mapping.currentColumn=''; 
     mapping.currentProperty='';
     mapping.defaultValue = '';
+    updateEllipsis(mapping);
     return {
       ...state,
       mapping
@@ -726,17 +806,30 @@ export default createReducer(initialState, {
     }
   },
   [types.HANDLECSVMAPDATAREMOVE] (state, action) {
-    alert(action.payload);
     const { rowid } = action.payload;
     let mapping = state.mapping;
-    mapping.mappingData.splice(rowid, 1);
-    for (let i = 0; i < mapping.mappingData.length; i++) {
-      mapping.mappingData[i].indx = i;
+    for(let i=0; i<state.mapping.mappingData.length; i++){
+      if(state.mapping.mappingData[i].index == state.mapping.mappingData[rowid].index && state.mapping.mappingData[i].ellipsis){
+        let ellip = state.mapping.mappingData[i].ellipsis;
+        let ellipsis = [];
+        for(let x=0; x<ellip.length; x++){
+          if(ellip[x] != state.mapping.mappingData[rowid].userFieldName){
+            ellipsis.push(ellip[x]);
+          }
+        }
+        state.mapping.mappingData[i].ellipsis = ellipsis;
+
+      }
     }
-    mapping = mappedColPro(mapping);
+    state.mapping = updateEllipsis(state.mapping);
+    state.mapping.mappingData.splice(rowid, 1);
+    for (let i = 0; i < state.mapping.mappingData.length; i++) {
+      state.mapping.mappingData[i].indx = i;
+    }
+    state.mapping = updateEllipsis(state.mapping);
+    //state.mapping = mappedColPro(state.mapping);
     return {
-      ...state,
-      mapping
+      ...state
     }
   },
   [types.GETSYNONYMSLISTSUCCESS] (state, action) {
@@ -754,9 +847,12 @@ export default createReducer(initialState, {
     };
   },
   [types.SAVEMAPPEDDATASUCCESS] (state, action) {
+    const response = action.payload.response;
     state.currentview = "import";
     state.block = ['prev','next'];
-    state.importer.convertedJSON = action.payload.response.convertedJSON;
+    state.importer.convertedJSON = response.convertedJSON;
+    state.importer.id = response.id;
+    state.importer.tenantId = response.tenantId;
     return {
       ...state
     }
@@ -796,10 +892,10 @@ export default createReducer(initialState, {
     for (firsttable in tables) break;
 
     const children = _.map(tables[firsttable].children, function(val, key) {
+
       return {label: key, value: key, children: []};
     });
     tableData.push({label: firsttable, value: firsttable, children: children});
-
     state.mapping.tables = tableData;
     state.mapping.childTables = children;
     state.mapping.mappingName = mapping.mappingName;
@@ -841,6 +937,29 @@ export default createReducer(initialState, {
   },
   [types.AUTOMAPCHECK] (state, action) {
     state.autoMap = true;
+    return {
+      ...state
+    }
+  },
+  [types.DOWNLOADDATASUCCESS] (state, action) {
+    return {
+      ...state
+    }
+  },
+  [types.UPDATEMAPPINGSUCCESS] (state, action) {
+    const response = action.payload.response;
+    state.currentview = "import";
+    state.block = ['prev','next'];
+    state.importer.convertedJSON = response.convertedJSON;
+    state.importer.id = response.id;
+    state.importer.tenantId = response.tenantId;
+    return {
+      ...state
+    }
+  },
+  [types.HANDLEEMPTYDEFAULTVALUE] (state, action){
+    state.mapping.defaultValue = '';
+    state.mapping.currentColumn = '';
     return {
       ...state
     }

@@ -15,5 +15,6 @@ router.post('/uploadfile', controller.uploadFileData);
 router.post('/uploadCSV',csvImporter.any(), controller.uploadCSV);
 router.get('/getCSVdata/:id/:tenantId', controller.getMappingCSVData);
 router.put('/updateMapping/:id/:tenantId', controller.update);
+router.get('/download/:id/:tenantId', controller.download);
 
 module.exports = router;
