@@ -7,10 +7,9 @@ class ListBox extends Component {
   componentWillReceiveProps(nextProps) {
     this.props = nextProps;
   }
-  selectItem = (e) => {
-    e.preventDefault();
+  selectItem = (value, index) => {
   	if (this.props.onItemSelect) {
-  		this.props.onItemSelect(e);
+  		this.props.onItemSelect(value, index);
   	}
   }
   isSelectionValid = (level) => {
@@ -54,7 +53,19 @@ class ListBox extends Component {
         if (!isValidSelection) {
           children.push(<optgroup label={data[i].value}></optgroup>);
         } else {
-          children.push(<option value={v} data-index={i} className="ellipsis" style={newstyle}>{l}</option>);
+          children.push(<a href="javascript:void(0)" className="list-group-item" data-index={i} data-list={this.props.type} data-select={v+'-'+this.props.type} onClick={this.selectItem.bind(this,v,i)}>
+                {v}
+                <div className="pull-right btn-group">
+                  {highlightstyle.required ?
+                    <span className="label label-default">Required</span>
+                    :null
+                  }
+                  {highlightstyle.mapped ?
+                    <span className="pull-right glyphicon glyphicon-check"></span>
+                    : null
+                  }
+                </div>
+              </a>);
         }
         children = children.concat(this.renderChild(data[i].children, value, level+1));
 	  	}
@@ -63,9 +74,9 @@ class ListBox extends Component {
   }
   render() {
     return (
-    	<select  className="mapping-select" size="20" onClick={this.selectItem}>
+      <div className="list-group list-group-sm list-group-ext">
         {this.renderChild(this.props.data, this.props.value, 0)}
-      </select>
+      </div>
    	);
   }
 }

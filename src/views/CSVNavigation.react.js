@@ -1,12 +1,16 @@
 import React from 'react';
-import {Button} from 'react-bootstrap';
+import {Button, Glyphicon} from 'react-bootstrap';
 
 class CSVNavigation extends React.Component {
   constructor(props) {
     super(props);
+    console.log('--CSV Navigation--', this.props);
   }
   componentWillReceiveProps(nextProps) {
     this.props = nextProps;
+  }
+  resetPreviewSetting = () => {
+    this.props.previewSetting();
   }
   checkDisability = (buttontype) => {
     if (this.props.block.indexOf(buttontype) > -1 ){
@@ -16,13 +20,14 @@ class CSVNavigation extends React.Component {
   }
   render() {
     return (
-      <div>
-      <div className="pull-left">
-         <Button className="btn btn-primary" disabled={this.checkDisability('prev')} onClick={this.props.onPrev}>Prev</Button>
-      </div>
-      <div className="pull-right">
-        <Button className="btn btn-primary" disabled={this.checkDisability('next')} onClick={this.props.onNext}>Next</Button>
-      </div>
+      <div className="form-submit text-right">
+        { this.props.data.currentview == 'preview' ?
+          <Button onClick={this.resetPreviewSetting.bind(this)}>Reset Preview</Button>
+        : null
+        }
+        <span> </span>
+        <Button disabled={this.checkDisability('prev')} onClick={this.props.onPrev}><Glyphicon glyph="chevron-left"/></Button><span> </span>
+        <Button bsStyle="primary" disabled={this.checkDisability('next')} onClick={this.props.onNext}>Next <Glyphicon glyph="chevron-right" /></Button>
       </div>
     )
   }

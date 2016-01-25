@@ -29,15 +29,15 @@ const initialState = {
         {value: 'MM/DD/YYYY', label: 'MM/DD/YYYY'}
       ],
       numberformat: [
-        {value: '#,###.##', label: '#,###.##'},
-        {value: '#.##', label: '#.##'},
-        {value: '#,##', label: '#,##'},
-        {value: '#.###,##', label: '#.###,##'}
+        {value: '#,###.##', label: '1,000.00'},
+        {value: '#.##', label: '1.00'},
+        {value: '#,##', label: '1,00'},
+        {value: '#.###,##', label: '1.000,00'}
       ],
       delimiterformat: [
-        {value: ',', label: 'Comma(,)'},
-        {value: ';', label: 'Semicolumn(;)'},
-        {value: '|', label: 'Pipe(|)'}
+        {value: ',', label: 'Comma: 1,2'},
+        {value: ';', label: 'Semicolon: 1;2'},
+        {value: '|', label: 'Pipe: 1|2'}
       ]
     }
   },

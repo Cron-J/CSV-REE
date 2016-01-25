@@ -143,15 +143,15 @@ function mappingValidation(data){
 }
 
 export function saveMappedData(data) {
-  if(mappingValidation(data)){
+  //if(mappingValidation(data)){
     if(data.params.id) {
       return updateMappedData(data.csv, data.params.id);
     } else {
       return createMappedData(data.csv);
     }
-  }else{
+  /*}else{
     return messageActions.showmessages('All required properties should be mapped.', 'error');
-  }
+  }*/
 }
 
 function createMappedData(data) {

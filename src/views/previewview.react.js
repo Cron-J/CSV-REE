@@ -1,5 +1,5 @@
 import React, { Component, PropTypes } from 'react';
-import {Modal, Input, Button} from 'react-bootstrap';
+import {ButtonToolbar, Glyphicon, Modal, Input, Button} from 'react-bootstrap';
 import CustomTable from './customTable.react';
 
 class PreviewView extends Component {
@@ -69,55 +69,71 @@ class PreviewView extends Component {
 
   render() {
     return (
-      <div className="container">
+        <form className="form-horizontal">
         <div className="row">
-          <div className="Preview-Container">
-            <legend>File Preview</legend>
-            <div className="col-lg-6">
-              <div className="row">
-                <div className="form-horizontal">
-                  <div className="form-group">
-                    <label className="col-sm-4 control-label">First line include header</label>
-                    <div className="col-sm-8">
-                      <Input type="checkbox" checked={this.props.data.noHeader}  onChange={this.changeHeader}/>
-                    </div>
-                  </div>
-                  <div className="form-group">
-                    <label className="col-sm-4 control-label">Date Format </label>
-                    <div className="col-sm-8">
-                      <select name="datePattern" className="form-control" onChange={this.changeDateFormat} required>
-                        {this._renderDateOptions()}
-                      </select>
-                    </div>
-                  </div>
-                  <div className="form-group">
-                    <label className="col-sm-4 control-label">Number Format</label>
-                    <div className="col-sm-8">
-                      <select name="numberPattern" className="form-control" onChange={this.changeNumberFormat}  required>
-                        {this._renderNumberFormatOptions()}
-                      </select>
-                    </div>
-                  </div>
-                  <div className="form-group">
-                    <label className="col-sm-4 control-label">Delimiter Format</label>
-                    <div className="col-sm-8">
-                      <select name="decimalSeparator" className="form-control" onChange={this.changeDelimiterFormat} required>
-                        {this._renderDelimiterOptions()}
-                      </select>
-                    </div>
-                  </div>
-                  <div className="row btn-margin btn-Allignment">
-                  <button className="btn btn-primary" onClick={this.resetPreviewSetting.bind(this)}>Reset Preview Settings</button>
-                </div>
+          <div className="col-md-3">
+
+            <div className="form-group">
+              <label className="col-sm-5 control-label">Date Format</label>
+              <div className="col-sm-7">
+                <select name="type" className="form-control" id="type" onChange={this.changeDateFormat} required>
+                  {this._renderDateOptions()}
+                </select>
+              </div>
+            </div>
+
+          </div>
+          <div className="col-md-3">
+
+            <div className="form-group">
+              <label className="col-sm-6 control-label">Number Format</label>
+              <div className="col-sm-6">
+                <select name="type" className="form-control" id="type" onChange={this.changeNumberFormat} required>
+                  {this._renderNumberFormatOptions()}
+                </select>
+              </div>
+            </div>
+
+          </div>
+          <div className="col-md-4">
+
+            <div className="form-group">
+              <label className="col-sm-5 control-label">Delimiter Format</label>
+              <div className="col-sm-7">
+                <select name="type" className="form-control" id="type" onChange={this.changeDelimiterFormat} required>
+                  {this._renderDelimiterOptions()}
+                </select>
+              </div>
+            </div>
+
+          </div>
+          <div className="col-md-2">
+
+            <div className="form-group">
+              <div className="col-sm-12">
+                <div className="btn-group" data-toggle="buttons">
+                  <label className="btn btn-default active">
+                    <input type="checkbox" id="header" autocomplete="off" checked  onChange={this.changeHeader}>Use first line as header</input>
+                  </label>
                 </div>
               </div>
             </div>
+
           </div>
+
         </div>
-        <div className="row">
-          <CustomTable headers={this.props.data.resultdata.headers} data={this.props.data.resultdata.data} />
+        <hr></hr>
+
+        <div className="table-box">
+        { this.props.data.resultdata.headers && this.props.data.resultdata.headers.length>0 ?
+          <div className="table-responsive">
+            <CustomTable headers={this.props.data.resultdata.headers} data={this.props.data.resultdata.data} />
+          </div>
+          : null
+        }
+          
         </div>
-      </div>
+        </form>
     );
   }
 }

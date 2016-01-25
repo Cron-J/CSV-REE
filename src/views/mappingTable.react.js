@@ -35,10 +35,11 @@ class MappingTable extends Component {
 		  return row.actualTable+'.' + row.field;
 	}
 	transformationsFormat = (data, row) => {
-		return <Button bsStyle="default" bsSize="xsmall" onClick={this.onTransformation.bind(this, row.transformations, row.indx)}><Glyphicon glyph="edit"/></Button>;;
+	    console.log('---row---', data);		
+		return <Button class="btn btn-default btn-sm" onClick={this.onTransformation.bind(this, row.transformations, row.indx)}><Glyphicon glyph="pencil"/><span className="label label-default">{data.length} active</span></Button>;
 	}
 	actionFormat = (data, row) => {
-		return <Button bsStyle="danger" bsSize="xsmall" onClick={this.removeRow.bind(this, row.indx)}>Remove <Glyphicon glyph="remove"/></Button>;
+		return <Button class="btn btn-default btn-sm" onClick={this.removeRow.bind(this, row.indx)}><Glyphicon glyph="trash"/></Button>;
 	}
 	render() {
 		return (

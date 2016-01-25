@@ -8,6 +8,7 @@ import { bindActionCreators } from 'redux';
 import { connect } from 'react-redux';
 import * as CSVActions from '../actions/csvActions';
 import {Modal, Input, Button} from 'react-bootstrap';
+import Footer from '../views/footer.react';
 
 
 class Home extends React.Component {
@@ -210,8 +211,8 @@ class Home extends React.Component {
             
           </Modal.Body>
           <Modal.Footer>
-            <Button className="btn-primary" onClick={this.close} value='true'>Yes</Button>
-            <Button className="btn-primary" onClick={this.close} value='false'>No</Button>
+            <Button bsStyle="primary" onClick={this.close} value='true'>Yes</Button>
+            <Button bsStyle="primary" onClick={this.close} value='false'>No</Button>
           </Modal.Footer>
         </Modal>
         <div className="row">
@@ -237,7 +238,7 @@ class Home extends React.Component {
         </div>
 
         <div className="row">
-          <CSVNavigation onPrev={this.onPrevNext.bind(this, 0)} onNext={this.onPrevNext.bind(this, 1)} block={this.props.csv.block} />
+          <CSVNavigation onPrev={this.onPrevNext.bind(this, 0)} onNext={this.onPrevNext.bind(this, 1)} block={this.props.csv.block} data={this.props.csv} previewSetting={this.previewSetting}/>
         </div>
       </div>
     );

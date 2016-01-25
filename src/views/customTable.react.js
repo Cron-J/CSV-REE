@@ -31,7 +31,7 @@ class Customtable extends React.Component {
   }
   render() {
     return (
-      <BootstrapTable data={this.props.data} striped hover>
+      <BootstrapTable data={this.props.data}>
         {this._renderColumn()}
       </BootstrapTable>
     )

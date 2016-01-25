@@ -8,9 +8,123 @@
   <link rel="stylesheet" href="/stylesheets/react-bootstrap-table.min.css">
   <link rel="stylesheet" href="/stylesheets/mystyle.css">
   <link rel="stylesheet" href="/stylesheets/react-select.css">
+  <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
+  <link rel="stylesheet" href="/stylesheets/animate.css">
+  <link rel="stylesheet" href="/stylesheets/jcatalog-bootstrap-bundle.css">
+  <link rel="stylesheet" href="/stylesheets/jcatalog-bootstrap-extensions-bundle.css">
+  <style>
+    .btn-group-wizard {
+        border: 1px solid #ccc;
+        margin-bottom: 2em;
+    }
 
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/css/toastr.min.css">
-<link rel="stylesheet" href="/stylesheets/animate.css">
+    .btn-group-wizard .btn-wizard {
+        padding-top: 15px;
+        border: 0;
+        border-left: 1px solid #ccc;
+        text-align: left;
+        border-top: 5px solid transparent;
+        border-bottom: 5px solid transparent;
+    }
+
+    .btn-group-wizard .btn-wizard:first-child {
+        border-left: 0;
+    }
+
+    .btn-group-wizard .btn-wizard.active {
+        /*background: #f9f9f9;*/
+        box-shadow: none;
+        color: #333;
+        border-bottom: 5px solid #2e6b99;
+    }
+
+    .btn-group-wizard .btn-wizard .badge {
+        background: transparent;
+        color: #000;
+        font-size: 2em;
+        font-weight: normal;
+    /*  border: 1px solid #ccc;
+    */  vertical-align: middle;
+        margin-right: .25em;
+        float: left;
+        margin-top: -6px;
+
+    }
+
+
+    .dropzoneContainer{
+    position: relative;
+    top:10px;
+   background: #F8F8F8;
+    border: 5px dashed #DDD;
+    width: auto;
+    height: auto;
+    padding: 100px 54px;
+    text-align: center;
+    cursor:pointer;
+    margin-bottom: 2em;
+}
+    .img-header {
+      height: 1.5em; 
+      margin-top: -.25em; 
+      margin-bottom: -.25em;
+    }
+    .list-group-ext {
+      max-height: 400px; 
+      overflow: auto;
+    }
+    .ext-height {
+      height: 34px;
+    }
+
+        .form-group select.form-control.form-mapping {
+      overflow: auto;
+      padding: 5px;
+    }
+
+    .form-group select.form-control.form-mapping option {
+      padding: 10px 5px;
+      background: transparent;
+      border-bottom: 1px solid #eee;
+    }
+
+    .list-group-item {
+      padding-right: 0px !important;
+      background: transparent !important;
+    }
+
+    .list-group-item > .pull-right > .glyphicon {
+      margin-right: 4px !important;
+    }
+
+
+    .list-group-item:hover {
+      background: #eee;
+    }
+
+
+    .list-group-item.active,
+    .list-group-item.active:hover {
+      background: #2e6b99 !important;
+      color: #fff !important;
+      text-shadow: none !important;
+    }
+
+    .list-group-item.active a,
+    .list-group-item.active .btn,
+    .list-group-item.active span {
+      color: #fff;
+    }
+
+    .list-group-item.active, .list-group-item.active:hover {
+    background: #2e6b99 !important;
+    color: #fff !important;
+    text-shadow: none !important;
+}
+
+}
+
+    </style>
 
 </head>
 <body>
@@ -19,6 +133,9 @@
   <script src="/js/bootstrap-3.3.5.min.js"></script>
   <script src="/js/react-bootstrap-0.24.5.min.js"></script>
   <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/js/toastr.min.js"></script>
+  <footer>
+      <div class="container copyright text-center">&copy; 2001 &mdash; 2015 <a href="http://www.jcatalog.com/">jCatalog Software AG</a></div>
+    </footer>
 </body>
 </html>
 

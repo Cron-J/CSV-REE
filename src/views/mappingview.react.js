@@ -16,27 +16,39 @@ class MappingView extends Component {
   onMappingNameChange = (e) => {
     this.props.onChnageMappingName(e.currentTarget.value);
   }
-  onMap = () => {
+  removeActiveClasses = () => {
     $('.default-value').removeClass('active');
+    $("a[data-list='column'").removeClass('active');
+    $("a[data-list='table'").removeClass('active');
+    $("a[data-list='property'").removeClass('active');
+  }
+  onMap = () => {
+    this.removeActiveClasses();
     this.props.onMappData();
   }
   onMapAttribute = () => {
     this.props.onMapAttribute();
   }
-  onColumnChange = (column) => {
+  onColumnChange = (column,index) => {
+    $("a[data-list='column'").removeClass('active');
+    $("a[data-select='"+column+"-column'").addClass('active');
     if (this.props.onColumnChange) {
-      this.props.onColumnChange(column.target.value);
+      this.props.onColumnChange(column);
     }
   }
-  onTableSelect = (table) => {
-    let index = $(table.target).attr('data-index');
+  onTableSelect = (table, index) => {
+    $("a[data-list='table'").removeClass('active');
+    $("a[data-list='property'").removeClass('active');
+    $("a[data-select='"+table+"-table'").addClass('active');
     if (this.props.onTableSelect) {
-      this.props.onTableSelect(table.target.value, index);
+      this.props.onTableSelect(table, index);
     }
   }
-  onPropertyChange = (property) => {
+  onPropertyChange = (property, index) => {
+    $("a[data-list='property'").removeClass('active');
+    $("a[data-select='"+property+"-property'").addClass('active');
     if (this.props.onPropertyChange) {
-      this.props.onPropertyChange(property.target.value);
+      this.props.onPropertyChange(property);
     }
   }
   onMapSelect = (value) => {
@@ -91,7 +103,7 @@ class MappingView extends Component {
   renderColumnHiglight = () => {
     let object = {};
     _.each(this.props.data.map.mappedColumn, function(val, index){
-      object[val] = {color: '#3c763d'};
+      object[val] = {color: '#3c763d', mapped: true};
     });
     return object;
   }
@@ -107,14 +119,17 @@ class MappingView extends Component {
     const selectedTable = this.props.data.map.selectedTable.split('(');
     _.each(this.props.data.map.requiredProperty, function(val, index){
       if (!mappedProperty[val]) {
-        object[val] = {color: '#31708f'};
+        object[val] = {color: '#31708f', required:true};
       }
     });
     _.each(this.props.data.map.mappedProperty, function(val, index){
       for(let i in val){
         if(selectedTable[0] == i && val[i]['index'] == selectedChildTableIndex){
           console.log('---pp---', val[i]['property']);
-          object[val[i]['property']] = {color: '#3c763d'};
+          console.log('check object', object[val[i]['property']]);
+          if(!object[val[i]['property']])
+            object[val[i]['property']] = {};
+          object[val[i]['property']]['mapped']= true;
         }
       }
     });
@@ -122,84 +137,106 @@ class MappingView extends Component {
       }
   render() {
     return (
-      <div className="container">
+          <div className="container">
+      <form className="form-horizontal">
         <div className="row">
-          <div className="upload-container">
-            <legend>Mapping</legend>
-          </div>
-          <form className="form-horizontal" role="form" name="mapForm">
+          <div className="col-md-4">
+
             <div className="form-group">
-              <label htmlFor="x" className="col-sm-2 control-label">Mapping Name</label>
-              <div className="col-sm-3">
-                <input name="mapname" className="form-control"
-                value={this.props.data.map.mappingName}
-                onChange={this.onMappingNameChange}
-                placeholder="Choose Mapping Name" type="text"
-                required disabled={this.props.data.viewOnly} />
+              <label className="col-sm-4 control-label">Mapping Name</label>
+              <div className="col-sm-8">
+                <input type="text" className="form-control" value={this.props.data.map.mappingName}
+                onChange={this.onMappingNameChange} required disabled={this.props.data.viewOnly}></input>
               </div>
             </div>
-          </form>
-          <div className="bs-callout bs-callout-info">
-            <p><span className="text-info"><b>Required properties</b> are displayed in blue.</span><br/><span className="text-success"><b>Mapped properties</b> are marked with green color.</span></p>
+
           </div>
+
+
         </div>
+        <hr></hr>
+
+
         <div className="row">
-          <div className="col-md-3">
-             <h4>Columns from input file <a className="btn btn-default"><span className="glyphicon glyphicon-question-sign"></span></a></h4>
-          </div>
-          <div className="col-md-4 col-md-offset-2">
-            <h4>Tables <a className="btn btn-default"><span className="glyphicon glyphicon-question-sign"></span></a></h4>
-          </div>
-          <div className="col-md-3">
-             <h4>Properties <a className="btn btn-default"><span className="glyphicon glyphicon-question-sign"></span></a></h4>
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-md-3">
-            <ListBox highlightItems={this.renderColumnHiglight()} value={this.props.data.map.currentColumn} data={this.props.data.map.columns} onItemSelect={this.onColumnChange}/>
-          </div>
-          
-          <div className="col-md-2">
-            <ButtonToolbar>
-              <Button disabled={this.isMapValid()} bsStyle="default" onClick={this.onMap}>
-                Map <Glyphicon glyph="chevron-right"/> 
-              </Button>
-              <br /><br />
-              <Button disabled={this.isAutoAttributeMapValid()} bsStyle="default" onClick={this.onMapAttribute}>
-                Auto Add Attribute <Glyphicon glyph="chevron-right"/> 
-              </Button>
-            </ButtonToolbar>
-          </div>
           <div className="col-md-4">
-            <ListBox selectionlevel={[0, 2]} value={this.props.data.map.tableObject} data={this.props.data.map.tables} onItemSelect={this.onTableSelect}/>
-          </div>
-          <div className="col-md-3">
-            <ListBox highlightItems={this.renderPropertyHighlight()} value={this.props.data.map.currentProperty} data={this.props.data.map.properties} onItemSelect={this.onPropertyChange}/>
-          </div>
-        </div>
-        <div className="row">
-          <div className="col-md-3">
-            <div className="btn-group ">
-              <button type="button" className="btn btn-default default-value"  onClick={this.selectDefaultValue} data-toggle="button"><span>Default value</span><span></span></button>
-            </div>
-            <form role="form">
-              <div className="form-group">
-                <input type="text" className="form-control" value={this.props.data.map.defaultValue} onChange={this.onDefaultValueChange}></input>
+
+            <h4>Input File Columns
+              <div className="pull-right">
+                <button className="btn btn-default btn-xs"><span className="glyphicon glyphicon-question-sign"></span></button>
               </div>
-            </form>
+            </h4>
+
+            <div className="input-group">
+              <span className="input-group-btn">
+                <Button className="btn btn-default default-value" onClick={this.selectDefaultValue} data-toggle="button">Default Value</Button>
+              </span>
+              <input type="text" className="form-control" value={this.props.data.map.defaultValue} onChange={this.onDefaultValueChange} placeholder=""></input>
+              <span className="input-group-btn">
+                <button className="btn btn-default"><span className="glyphicon glyphicon-pencil"></span></button>
+              </span>
+            </div>
+            <hr></hr>
+
+            
+              <ListBox type="column" highlightItems={this.renderColumnHiglight()} value={this.props.data.map.currentColumn} data={this.props.data.map.columns} onItemSelect={this.onColumnChange}/>
+
           </div>
-          <div className="col-md-2">
-          </div>
-          <div className="col-md-4">
-            <MapSelection remove={this.props.data.map.remove} tableobject={this.props.data.map.tableObject} onAdd={this.onAdd} onRemove={this.onRemove} onSelect={this.onMapSelect} value={this.props.data.map.currentTable} data={this.props.data.map.childTables} />
+          <div className="col-md-1">
+            <h4>&nbsp;</h4>
+            <div className="form-group">
+              <div className="col-sm-12 ext-height">
+              </div>
+            </div>
+            <hr></hr>
+
+            <button type="button"  disabled={this.isMapValid()} onClick={this.onMap} className="btn btn-primary btn-block">Map <span className="glyphicon glyphicon-chevron-right"></span></button>
+            <button type="button" disabled={this.isAutoAttributeMapValid()} onClick={this.onMapAttribute} className="btn btn-default btn-block">Auto<br/>Add</button>
+
           </div>
           <div className="col-md-3">
+
+            <h4>Tables
+              <div className="pull-right">
+                <button className="btn btn-default btn-xs"><span className="glyphicon glyphicon-question-sign"></span></button>
+              </div>
+            </h4>
+            <div className="form-group">
+              <div className="col-sm-12">
+              <MapSelection remove={this.props.data.map.remove} tableobject={this.props.data.map.tableObject} onAdd={this.onAdd} onRemove={this.onRemove} onSelect={this.onMapSelect} value={this.props.data.map.currentTable} data={this.props.data.map.childTables} />
+              </div>
+            </div>
+            <hr></hr>
+
+             <ListBox type="table" selectionlevel={[0, 2]} value={this.props.data.map.tableObject} data={this.props.data.map.tables} onItemSelect={this.onTableSelect}/>
+          </div>
+          <div className="col-md-4">
+
+
+            <h4>Properties
+              <div className="pull-right">
+                <button className="btn btn-default btn-xs"><span className="glyphicon glyphicon-question-sign"></span></button>
+              </div>
+            </h4>
+            <div className="form-group">
+              <div className="col-sm-12 ext-height">
+              </div>
+            </div>
+            <hr></hr>
+              <ListBox type="property" highlightItems={this.renderPropertyHighlight()} value={this.props.data.map.currentProperty} data={this.props.data.map.properties} onItemSelect={this.onPropertyChange}/>
+          </div>
+
+        </div>
+        <hr></hr>
+        <div className="table-box">
+          <div className="table-responsive">
+           <MappingTable onsaveTranformation={this.onsaveTranformation} onRemove={this.onMapdataRemove} data={this.props.data.map.mappingData} />
           </div>
         </div>
-        <div className="row">
-          <MappingTable onsaveTranformation={this.onsaveTranformation} onRemove={this.onMapdataRemove} data={this.props.data.map.mappingData} />
-        </div>
-      </div>
+
+
+</form>
+
+    </div>
     );
   }
 }

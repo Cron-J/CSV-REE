@@ -8,7 +8,7 @@ class Header extends Component {
   }
   render() {
     return (
-      <div className="navbar navbar-default navbar-main-menu">
+     <div className="navbar navbar-default navbar-main-menu">
         
         <div className="navbar-header">
           <button type="button" className="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">

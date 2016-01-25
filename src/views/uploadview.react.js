@@ -15,11 +15,9 @@ class UploadView extends React.Component {
   }
   render() {
     return (
-      <div className="container">
         <div className="row">
           <Fileuploader fileinfo={this.props.data.fileinfo} onFileupload={this.onupload} fileFormat={this.props.data.fileFormats} />
         </div>
-      </div>
     );
   }
 }
