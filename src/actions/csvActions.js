@@ -312,12 +312,9 @@ export function changeProperty(property) {
   };
 }
 
-export function changeHeader(check) {
+export function changeHeader() {
   return {
-    type: types.HANDLECSVPREVIEWHEADERCHANGE,
-    payload: {
-      check
-    }
+    type: types.HANDLECSVPREVIEWHEADERCHANGE
   };
 }
 

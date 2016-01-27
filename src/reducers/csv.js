@@ -559,10 +559,9 @@ export default createReducer(initialState, {
     };
   },
   [types.HANDLECSVPREVIEWHEADERCHANGE] (state, action) {
-    const {check} = action.payload;
     const preview = state.preview;
-    preview.resultdata = formatPreview(preview.originaldata, preview.delimiter, check, preview.numberFormat, preview.dateFormat, preview.dateFormat);
-    preview.noHeader = check;
+    (preview.noHeader) ? preview.noHeader=false : preview.noHeader=true;
+    preview.resultdata = formatPreview(preview.originaldata, preview.delimiter, preview.noHeader, preview.numberFormat, preview.dateFormat, preview.dateFormat);
     return {
       ...state,
       preview: preview

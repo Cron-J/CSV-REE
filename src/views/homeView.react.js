@@ -75,8 +75,8 @@ class Home extends React.Component {
   onDataSubmit = (data) => {
     this.triggeractions(data);
   }
-  onpreviewHeaderChange = (check) => {
-    this.actions.changeHeader(check);
+  onpreviewHeaderChange = () => {
+    this.actions.changeHeader();
   }
   // preview
   onchangeDelimiter = (delimiter) => {
