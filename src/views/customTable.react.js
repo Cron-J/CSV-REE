@@ -23,7 +23,9 @@ class Customtable extends React.Component {
   _renderColumn = () => {
     const tableheaders = [];
     let keyCount = 0;
-    for (let i = 0; i < 6; i++) {
+    let total;
+    (this.props.headers.length>5) ? total = 6 : total=this.props.headers.length;
+    for (let i = 0; i < total; i++) {
       tableheaders.push(this.getHeader(this.props.headers[i], keyCount === 0));
       keyCount++;
     }

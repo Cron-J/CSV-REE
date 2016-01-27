@@ -10,7 +10,9 @@ class PreviewView extends Component {
   componentWillReceiveProps(nextProps) {
     this.props = nextProps;
   }
+
   changeHeader = (e) => {
+    alert('select');
     if (this.props.onChangeHeader) {
       this.props.onChangeHeader(e.target.checked);
     }
@@ -113,7 +115,7 @@ class PreviewView extends Component {
               <div className="col-sm-12">
                 <div className="btn-group" data-toggle="buttons">
                   <label className="btn btn-default active">
-                    <input type="checkbox" id="header" autocomplete="off" checked  onChange={this.changeHeader}>Use first line as header</input>
+                    <input type="checkbox" id="header" autocomplete="off" defaultChecked={true} onChange={this.changeHeader} />Use first line as header
                   </label>
                 </div>
               </div>
