@@ -476,7 +476,7 @@ function autoMapping(currentState) {
               "table": synonymsList[index].tableName,
               "field": index,
               "defaultValue": currentState.mapping.defaultValue,
-              "index": currentState.mapping.mappingData.length,
+              "index": '0',
               "indx": currentState.mapping.mappingData.length,
               'actualTable': synonymsList[index].tableName,
               "instance": '',
@@ -492,19 +492,19 @@ function autoMapping(currentState) {
 }
 
 function autoMapTenantId(currentState) {
-  console.log(currentState);
+  console.log('kkklllll-----',currentState.mapping);
   let obj = {};
   obj['product'] = {'property': 'tenantId', 'index': '0'};
   currentState.mapping.mappedProperty.push(obj);
   currentState.mapping.mappingData.push({
     "userFieldName": 'tenant1',
     "transformations": [],
-    "table": 'product',
+    "table": currentState.mapping.tables[0].value,
     "field": 'tenantId',
     "defaultValue": '1',
     "index": '0',
     "indx": currentState.mapping.mappingData.length,
-    'actualTable': 'product',
+    'actualTable': currentState.mapping.tables[0].value,
     "instance": '',
     "isRequired": ''
   });

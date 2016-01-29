@@ -135,20 +135,24 @@ class Home extends React.Component {
     this.actions.updateMapTransformation(rowid, transformation);
   }
   autoCheckModel = () => {
-    alert('autoCheckModel');
-    if(this.props.csv.mapping.autoMapTenantId === false){
-      this.actions.autoMapTenantId();
-    }
     if(this.props.csv.autoMap == false){
       this.show = true;
       this.setState({});
-    }else
+    }else{
       this.actions.loadTables();
+      if(this.props.csv.mapping.autoMapTenantId === false){
+        this.actions.autoMapTenantId();
+      }
+    }
+      
   }
   close = (e) => {
     this.actions.autoMapCheck();
     this.actions.loadTables();
     this.show = false;
+    if(this.props.csv.mapping.autoMapTenantId === false){
+        this.actions.autoMapTenantId();
+      }
     if(e.target.value == 'true'){
       this.actions.autoMapping();
     }

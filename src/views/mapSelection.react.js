@@ -14,6 +14,7 @@ class MapSelection extends React.Component {
     }
   }
   renderoptions = () => {
+    console.log('mapSelection---->>>>', this.props.data);
     const options = [];
     options.push(<option value=''>Select table</option>);
     if (this.props.tableobject && this.props.tableobject.length > 0) {
