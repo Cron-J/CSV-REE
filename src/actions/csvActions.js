@@ -101,12 +101,19 @@ function validateTable(table, actualTable, data){
   for(let i=0; i<data.csv.mapping.tableRequiredFields[table].length; i++){
     let valid = false;
     for(let j=0; j<data.csv.mapping.mappingData.length; j++){
-      let mapActualTable = data.csv.mapping.mappingData[j].actualTable+'('+data.csv.mapping.mappingData[j].index+')';
+      let mapActualTable;
+      if(data.csv.mapping.mappingData[j].actualTable !== 'product'){
+        mapActualTable = data.csv.mapping.mappingData[j].actualTable+'('+data.csv.mapping.mappingData[j].index+')';
+      }else
+        mapActualTable = data.csv.mapping.mappingData[j].actualTable;
+      
       if(mapActualTable === actualTable && data.csv.mapping.mappingData[j].field === data.csv.mapping.tableRequiredFields[table][i]){
         valid = true;
       }
     }
     validate = valid;
+    if(!validate)
+      return false;
   }
   return validate;
 }
@@ -123,35 +130,39 @@ function mappingValidation(data){
   let valid = false;
   let mappedTable = [];
   for(let i=0; i<data.csv.mapping.mappingData.length; i++){
-    let actualTable = data.csv.mapping.mappingData[i].actualTable+'('+data.csv.mapping.mappingData[i].index+')';
+    let actualTable;
+    if(data.csv.mapping.mappingData[i].actualTable !== 'product'){
+      actualTable = data.csv.mapping.mappingData[i].actualTable+'('+data.csv.mapping.mappingData[i].index+')';
+    }else
+      actualTable = data.csv.mapping.mappingData[i].actualTable;
+    
     let c = check(mappedTable, actualTable);
     if(c)
       mappedTable.push({'table':data.csv.mapping.mappingData[i].table,'actualTable':actualTable});
   }
+  console.log('--mappedTable--', mappedTable);
   for(let table in data.csv.mapping.tableRequiredFields){
     for(let i=0; i<mappedTable.length; i++){
-      if(mappedTable[i].table === table)
-        if(validateTable(table, mappedTable[i].actualTable, data)){
-          valid = true;
-        }else{
-          valid = false;
-          return valid;
-        }
+      if(mappedTable[i].table === table){
+        console.log(table, mappedTable[i].actualTable, data);
+        valid = validateTable(table, mappedTable[i].actualTable, data);
+        console.log('--valid--', valid);
+      }
     }
   }
   return valid;
 }
 
 export function saveMappedData(data) {
-  //if(mappingValidation(data)){
+  if(mappingValidation(data)){
     if(data.params.id) {
       return updateMappedData(data.csv, data.params.id);
     } else {
       return createMappedData(data.csv);
     }
-  /*}else{
+  }else{
     return messageActions.showmessages('All required properties should be mapped.', 'error');
-  }*/
+  }
 }
 
 function createMappedData(data) {
@@ -163,7 +174,7 @@ function createMappedData(data) {
       }
     };
   }else {
-    return messageActions.showmessages('Please enter the mapping name', 'error');
+    return messageActions.showmessages('Please Enter Mapping Name', 'error');
   }
 }
 function updateMappedData(data,id) {
@@ -177,7 +188,7 @@ function updateMappedData(data,id) {
       transition: () => ({
         onSuccess: (response) =>({
           func: () =>{
-            return messageActions.showmessages('sucessfully mapping has updated', 'success');
+            return messageActions.showmessages('Successfully Updated', 'success');
           }
         }),
         onFail: (error) =>({
@@ -193,6 +204,12 @@ function updateMappedData(data,id) {
 export function autoMapping() {
   return {
     type: types.HANDLEAUTOMAPPING
+  };
+}
+
+export function autoMapTenantId() {
+  return {
+    type: types.HANDLEAUTOMAPTENANTID
   };
 }
 export function handleSynonymsList() {

@@ -34,8 +34,7 @@ class MappingTable extends Component {
 		else
 		  return row.actualTable+'.' + row.field;
 	}
-	transformationsFormat = (data, row) => {
-	    console.log('---row---', data);		
+	transformationsFormat = (data, row) => {	
 		return <Button class="btn btn-default btn-sm" onClick={this.onTransformation.bind(this, row.transformations, row.indx)}><Glyphicon glyph="pencil"/><span className="label label-default">{data.length} active</span></Button>;
 	}
 	actionFormat = (data, row) => {
@@ -51,10 +50,10 @@ class MappingTable extends Component {
 				 	action: this.actionFormat
 				 }}
 				 headers={[
-		              {value: 'userFieldName', label: 'Imported column'},
-		              {value: 'transformations', label: 'Manufacturer Name'},
-		              {value: 'table', label: 'Property name'},
-		              {value: 'field', label: 'Property description'},
+		              {value: 'userFieldName', label: 'Imported Column'},
+		              {value: 'transformations', label: 'Transformation'},
+		              {value: 'table', label: 'Property Name'},
+		              {value: 'field', label: 'Property Description'},
 		              {value: 'indx', label: 'Index'},
 		              {value: 'action', label: 'Actions'}
 		              // 'instance',

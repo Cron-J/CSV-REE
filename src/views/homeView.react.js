@@ -135,6 +135,10 @@ class Home extends React.Component {
     this.actions.updateMapTransformation(rowid, transformation);
   }
   autoCheckModel = () => {
+    alert('autoCheckModel');
+    if(this.props.csv.mapping.autoMapTenantId === false){
+      this.actions.autoMapTenantId();
+    }
     if(this.props.csv.autoMap == false){
       this.show = true;
       this.setState({});

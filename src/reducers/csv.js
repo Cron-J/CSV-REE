@@ -42,6 +42,7 @@ const initialState = {
     }
   },
   mapping: {
+    autoMapTenantId: false,
     mappingName: '',
     childTables: [],
     remove: false,
@@ -58,26 +59,39 @@ const initialState = {
     mappedColumn: [],
     mappedProperty: [],
     requiredProperty: [],
-    selectedChildTableIndex: ''
+    selectedChildTableIndex: 0
   },
   synonymsList: [],
   importer: {},
   currentview: 'upload',
   autoMap:false,
+  editView:false,
   order: ['upload', 'preview', 'mapping', 'import']
 };
 
 function blockers(view, data) {
   switch (view) {
-  case 'upload':
-    if (data.uploaded === true || data.fileinfo.name.length > 0) {
-      return ['prev'];
-    }
-    return ['prev', 'next'];
-    break;
-  default:
-    return [];
-    break;
+    case 'upload':
+      if (data.upload.uploaded === true || data.upload.fileinfo.name.length > 0) {
+        return ['prev'];
+      }
+      return ['prev', 'next'];
+      break;
+    case 'mapping':
+      if(data.editView === true){
+        return ['prev'];
+      }
+      return [];
+      break;
+    case 'import':
+      if(data.editView === true){
+        return ['prev'];
+      }
+      return [];
+      break;
+    default:
+      return [];
+      break;
   }
 }
 
@@ -144,9 +158,15 @@ function mappedColPro(state){
 function isSuccess(currentview, view, state) {
   switch (view) {
     case 'upload':
+      if(state.editView === true){
+        return false;
+      }
       return true;
       break;
     case 'preview':
+      if(state.editView === true){
+        return false;
+      }
       if (state.upload.uploaded === true || state.order.indexOf(currentview) > state.order.indexOf(view)) {
         return true;
       }
@@ -347,7 +367,6 @@ function mapData(mapping){
   let ellips;
   for (let i = 0; i < mapping.childTables.length; i++) {
     if (mapping.childTables[i].value === currentTable[0]) {
-      console.log('===',mapping.childTables)
       if(!mapping.childTables[i].children[mapping.selectedChildTableIndex].ellipsis){
         mapping.childTables[i].children[mapping.selectedChildTableIndex].ellipsis = [];
       }
@@ -457,7 +476,7 @@ function autoMapping(currentState) {
               "table": synonymsList[index].tableName,
               "field": index,
               "defaultValue": currentState.mapping.defaultValue,
-              "index": currentState.mapping.mappingData.length + 1,
+              "index": currentState.mapping.mappingData.length,
               "indx": currentState.mapping.mappingData.length,
               'actualTable': synonymsList[index].tableName,
               "instance": '',
@@ -469,7 +488,28 @@ function autoMapping(currentState) {
       break;
     }
   currentState.mapping.selectedTable = 'product';
-  return currentState.mapping;
+  return currentState;
+}
+
+function autoMapTenantId(currentState) {
+  console.log(currentState);
+  let obj = {};
+  obj['product'] = {'property': 'tenantId', 'index': '0'};
+  currentState.mapping.mappedProperty.push(obj);
+  currentState.mapping.mappingData.push({
+    "userFieldName": 'tenant1',
+    "transformations": [],
+    "table": 'product',
+    "field": 'tenantId',
+    "defaultValue": '1',
+    "index": '0',
+    "indx": currentState.mapping.mappingData.length,
+    'actualTable': 'product',
+    "instance": '',
+    "isRequired": ''
+  });
+  currentState.mapping.selectedTable = 'product';
+  return currentState;
 }
 
 function childTab(currentState){
@@ -490,10 +530,11 @@ export default createReducer(initialState, {
     if (!isSuccess(state.currentview, view, state)){
       view = state.currentview;
     }
+    console.log('view-->', view);
     return {
       ...state,
       currentview: view,
-      block: blockers(view, state[view])
+      block: blockers(view, state)
     };
   },
   [types.HANDLECSVUPLOAD] (state, action) {
@@ -502,7 +543,7 @@ export default createReducer(initialState, {
     upload.fileinfo = file;
     return {
       ...state,
-      block: blockers(state.currentview, upload),
+      block: blockers(state.currentview, state),
       upload: upload
     };
   },
@@ -524,7 +565,7 @@ export default createReducer(initialState, {
       ...state,
       preview: preview,
       currentview: view,
-      block: blockers(view, state.preview),
+      block: blockers(view, state),
       upload: upload
     };
   },
@@ -543,7 +584,7 @@ export default createReducer(initialState, {
     return {
       ...state,
       currentview: view,
-      block: blockers(view, state[view])
+      block: blockers(view, state)
     };
   },
   [types.HANDLECSVPREVIOUSVIEW] (state, action) {
@@ -555,7 +596,7 @@ export default createReducer(initialState, {
     return {
       ...state,
       currentview: view,
-      block: blockers(view, state[view])
+      block: blockers(view, state)
     };
   },
   [types.HANDLECSVPREVIEWHEADERCHANGE] (state, action) {
@@ -839,10 +880,16 @@ export default createReducer(initialState, {
     };
   },
   [types.HANDLEAUTOMAPPING] (state, action) {
-    const mapping = autoMapping(state);
+    let mapping = autoMapping(state);
     return {
-      ...state,
-      mapping
+      ...state
+    };
+  },
+  [types.HANDLEAUTOMAPTENANTID] (state, action) {
+    state = autoMapTenantId(state);
+    state.mapping.autoMapTenantId = true;
+    return {
+      ...state
     };
   },
   [types.SAVEMAPPEDDATASUCCESS] (state, action) {
@@ -902,11 +949,13 @@ export default createReducer(initialState, {
     state.mapping.mappingData = mapping.mappingInfo;
     state.mapping.tenantId = mapping.tenantId;
     state.mapping = mappedColPro(state.mapping);
+    state.mapping.selectedTable = 'product';
     state.preview.resultdata = preview.resultdata = formatPreview(file, preview.delimiter, preview.noHeader, preview.numberFormat, preview.dateFormat, preview.dateFormat);
     state.mapping.columns = _.map(state.preview.resultdata.headers, function(val){
       return {label: val, value: val};
     });
     state.currentview = 'mapping';
+    state.editView = true;
     return {
       ...state
     }
@@ -921,7 +970,7 @@ export default createReducer(initialState, {
     return {
       ...state,
       currentview: view,
-      block: blockers(view, state[view])
+      block: blockers(view, state)
     };
   },
   [types.GETMAPINFO] (state, action) {

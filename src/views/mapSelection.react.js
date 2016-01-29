@@ -57,7 +57,7 @@ class MapSelection extends React.Component {
     return (
       <div>
         <div className="col-md-8">
-          <Input type="select" placeholder="select table" value={this.renderValue()}  onChange={this.onSelectionChange}>
+          <Input type="select" placeholder="Select Table" value={this.renderValue()}  onChange={this.onSelectionChange}>
             {this.renderoptions()}
           </Input>
         </div>

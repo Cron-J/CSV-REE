@@ -125,8 +125,6 @@ class MappingView extends Component {
     _.each(this.props.data.map.mappedProperty, function(val, index){
       for(let i in val){
         if(selectedTable[0] == i && val[i]['index'] == selectedChildTableIndex){
-          console.log('---pp---', val[i]['property']);
-          console.log('check object', object[val[i]['property']]);
           if(!object[val[i]['property']])
             object[val[i]['property']] = {};
           object[val[i]['property']]['mapped']= true;
@@ -162,7 +160,7 @@ class MappingView extends Component {
 
             <h4>Input File Columns
               <div className="pull-right">
-                <button className="btn btn-default btn-xs"><span className="glyphicon glyphicon-question-sign"></span></button>
+                <Button className="btn btn-default btn-xs"><Glyphicon glyph="question-sign" /></Button>
               </div>
             </h4>
 
@@ -172,7 +170,7 @@ class MappingView extends Component {
               </span>
               <input type="text" className="form-control" value={this.props.data.map.defaultValue} onChange={this.onDefaultValueChange} placeholder=""></input>
               <span className="input-group-btn">
-                <button className="btn btn-default"><span className="glyphicon glyphicon-pencil"></span></button>
+                <Button className="btn btn-default"><span className="glyphicon glyphicon-pencil"></span></Button>
               </span>
             </div>
             <hr></hr>
@@ -197,7 +195,7 @@ class MappingView extends Component {
 
             <h4>Tables
               <div className="pull-right">
-                <button className="btn btn-default btn-xs"><span className="glyphicon glyphicon-question-sign"></span></button>
+                <Button className="btn btn-default btn-xs"><Glyphicon glyph="question-sign" /></Button>
               </div>
             </h4>
             <div className="form-group">
@@ -214,7 +212,7 @@ class MappingView extends Component {
 
             <h4>Properties
               <div className="pull-right">
-                <button className="btn btn-default btn-xs"><span className="glyphicon glyphicon-question-sign"></span></button>
+                <Button className="btn btn-default btn-xs"><Glyphicon glyph="question-sign" /></Button>
               </div>
             </h4>
             <div className="form-group">

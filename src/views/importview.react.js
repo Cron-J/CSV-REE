@@ -24,10 +24,12 @@ class ImportView extends Component {
                     </div>
                     <div className="col-lg-6">
                         <div className="row">
-                            <div ng-hide="mappedJson">
+                          { this.props.data.importer.convertedJSON.length === 0 ?
+                            <div>
                                 <i className="fa fa-spinner fa-pulse"></i>
                             Processing Json</div>
-                       
+                            :null
+                          }
                            <div>
                              <pre>{<JSONTree data={ this.props.data.importer.convertedJSON }/>}</pre>
                              <Button bsStyle="primary" onClick={this.onDownload.bind(this)}>Download</Button>                                                   

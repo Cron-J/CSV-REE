@@ -27,9 +27,6 @@ class EditMapping extends Component{
   edit() {
     this.actions.getMapInfo(this.selectedMap);
   }
-  redirectHome() {
-    this.actions.redirectToHome();
-  }
  	render(){
  		var mappingDropdown = [];
     if(this.props.state.csv.mappingList && this.props.state.csv.mappingList.length>0){
@@ -52,7 +49,6 @@ class EditMapping extends Component{
               </select>
   					</div>
             <ButtonToolbar>
-              <Button className="btn" bsStyle="primary" onClick={this.redirectHome.bind(this)}>Create Mapping</Button>
   					  {this.sltdMapping == true ?
   					  <Button className="btn" bsStyle="primary" onClick={this.edit.bind(this)}>Edit Mapping</Button> : '' }
   			    </ButtonToolbar>

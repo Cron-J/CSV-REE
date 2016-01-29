@@ -66,6 +66,7 @@ class Transformation extends Component {
 		return '';
 	}
 	remove = () => {
+		console.log('this.props', this.props);
 		if (this.props.onRemove) {
 			this.props.onRemove(this.props.id);
 		}

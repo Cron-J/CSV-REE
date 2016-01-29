@@ -7,7 +7,7 @@ class TransformationModal extends Component {
 		super(props);
 		this.state = {transformations: this.props.transformations};
 	}
-
+    
 	componentWillReceiveProps(nextProps) {
 		this.setState({transformations: this.props.transformations});
 		this.props = nextProps;
@@ -35,7 +35,8 @@ class TransformationModal extends Component {
 	onTransformationRemove = (id) => {
 		const change = this.state;
 		if (id > -1) {
-			change.transformations.splice(id, 1);
+
+			this.props.transformations.splice(id, 1);
 		}
 		this.setState(change);
 	}
@@ -57,7 +58,6 @@ class TransformationModal extends Component {
        		{this.renderTransformation()}
        	</Modal.Body>
        	<Modal.Footer>
-       		<Button bsStyle="primary" onClick={this.onTransformationSave}>Save</Button>
           <Button onClick={this.onTransformationClose}>Close</Button>
         </Modal.Footer>
       </Modal>
